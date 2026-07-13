@@ -16,7 +16,7 @@ divisor).
   (`resources/js`), compilado pelo Vite
 - **Axios** — usado para a chamada de cálculo em tempo real na Calculadora
   (`/calculadora/calcular`), sem recarregar a página
-- **SQLite** — banco de dados padrão (arquivo único, sem servidor externo)
+- **MySQL** — banco de dados padrão (servidor MySQL 8+ / MariaDB compatível)
 
 Diferente da versão anterior (pastas `backend/` e `frontend/` separadas com
 API + tokens Sanctum), aqui é **um projeto Laravel só**: mesmo `composer.json`
@@ -25,12 +25,19 @@ CORS ou tokens — exatamente como no `financialite`.
 
 ## Como rodar
 
+Antes de tudo, crie o banco no seu servidor MySQL local (ajuste o nome se
+mudar `DB_DATABASE` no `.env`):
+
+```sql
+CREATE DATABASE stlshypper CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
 ```bash
 composer install
 npm install
 cp .env.example .env
 php artisan key:generate
-touch database/database.sqlite
+# edite o .env se seu usuário/senha/porta do MySQL forem diferentes do padrão
 php artisan migrate
 php artisan db:seed
 composer run dev
