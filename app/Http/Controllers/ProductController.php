@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Services\PricingCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -86,15 +87,18 @@ class ProductController extends Controller
 
     private function validated(Request $request): array
     {
-        $request->validate([
-            'printer_id' => ['nullable', 'integer', 'exists:printers,id'],
-            'material_id' => ['nullable', 'integer', 'exists:materials,id'],
-        ]);
+        $userId = $request->user()->id;
 
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'printer_id' => ['nullable', 'integer'],
-            'material_id' => ['nullable', 'integer'],
+            'printer_id' => [
+                'nullable', 'integer',
+                Rule::exists('printers', 'id')->where('user_id', $userId),
+            ],
+            'material_id' => [
+                'nullable', 'integer',
+                Rule::exists('materials', 'id')->where('user_id', $userId),
+            ],
             'piece_weight_g' => ['required', 'numeric', 'min:0'],
             'print_time_h' => ['required', 'numeric', 'min:0'],
             'labor_cost' => ['required', 'numeric', 'min:0'],
