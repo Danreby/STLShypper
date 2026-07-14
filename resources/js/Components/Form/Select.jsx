@@ -1,28 +1,8 @@
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
 import { inputClass } from '@/Utils/inputStyles';
+import { parseOptions } from '@/Utils/parseSelectOptions';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronDown } from 'lucide-react';
-import { Children, isValidElement } from 'react';
-
-/**
- * Reads plain `<option>` children (same API as a native <select>) so every
- * existing call site keeps working unchanged, while the actual control
- * rendered is a fully-styled Headless UI Listbox that matches the rest of
- * the design system instead of the browser's native dropdown.
- */
-function parseOptions(children) {
-    const options = [];
-    Children.forEach(children, (child) => {
-        if (!isValidElement(child) || child.type !== 'option') return;
-        const rawValue = child.props.value !== undefined ? child.props.value : child.props.children;
-        options.push({
-            value: String(rawValue),
-            label: child.props.children,
-            disabled: !!child.props.disabled,
-        });
-    });
-    return options;
-}
 
 export default function Select({ className = '', children, value, onChange, disabled = false, name, placeholder }) {
     const options = parseOptions(children);
@@ -54,8 +34,6 @@ export default function Select({ className = '', children, value, onChange, disa
                         </motion.span>
                     </ListboxButton>
 
-                    {/* Anchored + portaled: escapes any transformed ancestor (e.g. animated
-                        Cards) so the panel never gets clipped or buried under later siblings. */}
                     <AnimatePresence>
                         {open && (
                             <ListboxOptions
