@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
+use App\Http\Resources\SettingResource;
 use App\Services\PricingCalculator;
+use App\Services\UserSettingsResolver;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly UserSettingsResolver $settingsResolver)
+    {
+    }
+
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $settings = $user->setting ?? Setting::create(array_merge(['user_id' => $user->id], Setting::defaults()));
+        $settings = $this->settingsResolver->forUser($user);
 
         $products = $user->products()->with(['printer', 'material'])->get();
 
@@ -40,7 +45,7 @@ class DashboardController extends Controller
                 ->sortByDesc(fn ($p) => $p['pricing']['total_profit'])
                 ->take(5)
                 ->values(),
-            'settings' => $settings,
+            'settings' => new SettingResource($settings),
         ]);
     }
 }

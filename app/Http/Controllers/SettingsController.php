@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
+use App\Http\Requests\Setting\UpdateSettingRequest;
+use App\Http\Resources\SettingResource;
+use App\Services\UserSettingsResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,33 +16,23 @@ use Inertia\Response;
  */
 class SettingsController extends Controller
 {
+    public function __construct(private readonly UserSettingsResolver $settingsResolver)
+    {
+    }
+
     public function edit(Request $request): Response
     {
-        $settings = $request->user()->setting
-            ?? Setting::create(array_merge(['user_id' => $request->user()->id], Setting::defaults()));
+        $settings = $this->settingsResolver->forUser($request->user());
 
         return Inertia::render('Settings', [
-            'settings' => $settings,
+            'settings' => new SettingResource($settings),
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(UpdateSettingRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'kwh_price' => ['required', 'numeric', 'min:0'],
-            'labor_rate' => ['required', 'numeric', 'min:0'],
-            'failure_pct' => ['required', 'numeric', 'min:0', 'max:0.9999'],
-            'extra_material_pct' => ['required', 'numeric', 'min:0', 'max:1'],
-            'tax_pct' => ['required', 'numeric', 'min:0', 'max:1'],
-            'fee_pct' => ['required', 'numeric', 'min:0', 'max:1'],
-            'margin_pct' => ['required', 'numeric', 'min:0', 'max:1'],
-            'hours_per_year' => ['required', 'integer', 'min:1'],
-        ]);
-
-        $settings = $request->user()->setting
-            ?? Setting::create(array_merge(['user_id' => $request->user()->id], Setting::defaults()));
-
-        $settings->update($data);
+        $settings = $this->settingsResolver->forUser($request->user());
+        $settings->update($request->validated());
 
         return back()->with('success', 'Parâmetros gerais atualizados com sucesso.');
     }

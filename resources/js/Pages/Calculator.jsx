@@ -2,13 +2,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/Card';
 import FormField from '@/Components/FormField';
 import AlertError from '@/Components/AlertError';
+import Input from '@/Components/Input';
+import Select from '@/Components/Select';
 import { formatCurrency, formatPercent, toPercentInput, fromPercentInput } from '@/Utils/format';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import axios from 'axios';
-
-const inputClass =
-    'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500';
 
 export default function Calculator({ printers, materials, settings }) {
     const [form, setForm] = useState({
@@ -73,38 +72,38 @@ export default function Calculator({ printers, materials, settings }) {
                             <AlertError message={error} />
 
                             <FormField label="Impressora">
-                                <select required className={inputClass} value={form.printer_id} onChange={updateField('printer_id')}>
+                                <Select required value={form.printer_id} onChange={updateField('printer_id')}>
                                     <option value="" disabled>Selecione...</option>
                                     {printers.map((p) => (
                                         <option key={p.id} value={p.id}>{p.name}</option>
                                     ))}
-                                </select>
+                                </Select>
                             </FormField>
 
                             <FormField label="Material">
-                                <select required className={inputClass} value={form.material_id} onChange={updateField('material_id')}>
+                                <Select required value={form.material_id} onChange={updateField('material_id')}>
                                     <option value="" disabled>Selecione...</option>
                                     {materials.map((m) => (
                                         <option key={m.id} value={m.id}>{m.name}</option>
                                     ))}
-                                </select>
+                                </Select>
                             </FormField>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField label="Peso da peça (g)">
-                                    <input type="number" step="0.01" required className={inputClass} value={form.piece_weight_g} onChange={updateField('piece_weight_g')} />
+                                    <Input type="number" step="0.01" required value={form.piece_weight_g} onChange={updateField('piece_weight_g')} />
                                 </FormField>
                                 <FormField label="Tempo de impressão (h)">
-                                    <input type="number" step="0.01" required className={inputClass} value={form.print_time_h} onChange={updateField('print_time_h')} />
+                                    <Input type="number" step="0.01" required value={form.print_time_h} onChange={updateField('print_time_h')} />
                                 </FormField>
                                 <FormField label="Mão de obra (R$)">
-                                    <input type="number" step="0.01" required className={inputClass} value={form.labor_cost} onChange={updateField('labor_cost')} />
+                                    <Input type="number" step="0.01" required value={form.labor_cost} onChange={updateField('labor_cost')} />
                                 </FormField>
                                 <FormField label="Custos fixos extras (R$)">
-                                    <input type="number" step="0.01" required className={inputClass} value={form.extra_fixed_costs} onChange={updateField('extra_fixed_costs')} />
+                                    <Input type="number" step="0.01" required value={form.extra_fixed_costs} onChange={updateField('extra_fixed_costs')} />
                                 </FormField>
                                 <FormField label="Quantidade (orçamento)">
-                                    <input type="number" min="1" className={inputClass} value={form.quantity} onChange={updateField('quantity')} />
+                                    <Input type="number" min="1" value={form.quantity} onChange={updateField('quantity')} />
                                 </FormField>
                             </div>
 
@@ -114,19 +113,19 @@ export default function Calculator({ printers, materials, settings }) {
                                 </summary>
                                 <div className="mt-3 grid grid-cols-2 gap-4">
                                     <FormField label="% material extra">
-                                        <input type="number" step="0.01" className={inputClass} value={form.extra_material_pct} onChange={updateField('extra_material_pct')} />
+                                        <Input type="number" step="0.01" value={form.extra_material_pct} onChange={updateField('extra_material_pct')} />
                                     </FormField>
                                     <FormField label="% perdas/falhas">
-                                        <input type="number" step="0.01" className={inputClass} value={form.failure_pct} onChange={updateField('failure_pct')} />
+                                        <Input type="number" step="0.01" value={form.failure_pct} onChange={updateField('failure_pct')} />
                                     </FormField>
                                     <FormField label="% impostos">
-                                        <input type="number" step="0.01" className={inputClass} value={form.tax_pct} onChange={updateField('tax_pct')} />
+                                        <Input type="number" step="0.01" value={form.tax_pct} onChange={updateField('tax_pct')} />
                                     </FormField>
                                     <FormField label="% taxas/cartão">
-                                        <input type="number" step="0.01" className={inputClass} value={form.fee_pct} onChange={updateField('fee_pct')} />
+                                        <Input type="number" step="0.01" value={form.fee_pct} onChange={updateField('fee_pct')} />
                                     </FormField>
                                     <FormField label="% margem de lucro">
-                                        <input type="number" step="0.01" className={inputClass} value={form.margin_pct} onChange={updateField('margin_pct')} />
+                                        <Input type="number" step="0.01" value={form.margin_pct} onChange={updateField('margin_pct')} />
                                     </FormField>
                                 </div>
                             </details>

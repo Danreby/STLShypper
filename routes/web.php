@@ -46,7 +46,9 @@ Route::middleware('auth')->group(function () {
 
     // Calculadora (1 Peça) - página via Inertia + cálculo ao vivo via axios (JSON)
     Route::get('/calculadora', [CalculatorController::class, 'index'])->name('calculator.index');
-    Route::post('/calculadora/calcular', [CalculatorController::class, 'compute'])->name('calculator.compute');
+    Route::post('/calculadora/calcular', [CalculatorController::class, 'compute'])
+        ->middleware('throttle:60,1')
+        ->name('calculator.compute');
 });
 
 require __DIR__.'/auth.php';

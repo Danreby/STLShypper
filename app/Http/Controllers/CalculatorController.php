@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
+use App\Http\Requests\Calculator\ComputeRequest;
+use App\Http\Resources\PrinterResource;
+use App\Http\Resources\MaterialResource;
+use App\Http\Resources\SettingResource;
 use App\Services\PricingCalculator;
+use App\Services\UserSettingsResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,37 +20,27 @@ use Inertia\Response;
  */
 class CalculatorController extends Controller
 {
+    public function __construct(private readonly UserSettingsResolver $settingsResolver)
+    {
+    }
+
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $settings = $user->setting ?? Setting::create(array_merge(['user_id' => $user->id], Setting::defaults()));
+        $settings = $this->settingsResolver->forUser($user);
 
         return Inertia::render('Calculator', [
-            'printers' => $user->printers()->orderBy('name')->get(),
-            'materials' => $user->materials()->orderBy('name')->get(),
-            'settings' => $settings,
+            'printers' => PrinterResource::collection($user->printers()->orderBy('name')->get()),
+            'materials' => MaterialResource::collection($user->materials()->orderBy('name')->get()),
+            'settings' => new SettingResource($settings),
         ]);
     }
 
-    public function compute(Request $request): JsonResponse
+    public function compute(ComputeRequest $request): JsonResponse
     {
         $user = $request->user();
-        $settings = $user->setting ?? Setting::create(array_merge(['user_id' => $user->id], Setting::defaults()));
-
-        $data = $request->validate([
-            'piece_weight_g' => ['required', 'numeric', 'min:0'],
-            'print_time_h' => ['required', 'numeric', 'min:0'],
-            'labor_cost' => ['nullable', 'numeric', 'min:0'],
-            'extra_fixed_costs' => ['nullable', 'numeric', 'min:0'],
-            'quantity' => ['nullable', 'integer', 'min:1'],
-            'printer_id' => ['nullable', 'integer'],
-            'material_id' => ['nullable', 'integer'],
-            'extra_material_pct' => ['nullable', 'numeric', 'min:0', 'max:1'],
-            'failure_pct' => ['nullable', 'numeric', 'min:0', 'max:0.9999'],
-            'tax_pct' => ['nullable', 'numeric', 'min:0', 'max:1'],
-            'fee_pct' => ['nullable', 'numeric', 'min:0', 'max:1'],
-            'margin_pct' => ['nullable', 'numeric', 'min:0', 'max:1'],
-        ]);
+        $settings = $this->settingsResolver->forUser($user);
+        $data = $request->validated();
 
         $printer = $data['printer_id'] ?? null ? $user->printers()->find($data['printer_id']) : null;
         $material = $data['material_id'] ?? null ? $user->materials()->find($data['material_id']) : null;

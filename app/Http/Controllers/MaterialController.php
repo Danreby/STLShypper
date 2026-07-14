@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Material\StoreMaterialRequest;
+use App\Http\Requests\Material\UpdateMaterialRequest;
+use App\Http\Resources\MaterialResource;
+use App\Models\Material;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,43 +16,36 @@ class MaterialController extends Controller
     public function index(Request $request): Response
     {
         return Inertia::render('Materials', [
-            'materials' => $request->user()->materials()->orderBy('name')->get(),
+            'materials' => MaterialResource::collection(
+                $request->user()->materials()->orderBy('name')->get()
+            ),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreMaterialRequest $request): RedirectResponse
     {
-        $data = $this->validated($request);
-
-        $request->user()->materials()->create($data);
+        $request->user()->materials()->create($request->validated());
 
         return back()->with('success', 'Material cadastrado com sucesso.');
     }
 
-    public function update(Request $request, int $material): RedirectResponse
+    public function update(UpdateMaterialRequest $request, int $material): RedirectResponse
     {
-        $data = $this->validated($request);
-
         $model = $request->user()->materials()->findOrFail($material);
-        $model->update($data);
+        $this->authorize('update', $model);
+
+        $model->update($request->validated());
 
         return back()->with('success', 'Material atualizado com sucesso.');
     }
 
     public function destroy(Request $request, int $material): RedirectResponse
     {
-        $request->user()->materials()->findOrFail($material)->delete();
+        $model = $request->user()->materials()->findOrFail($material);
+        $this->authorize('delete', $model);
+
+        $model->delete();
 
         return back()->with('success', 'Material removido.');
-    }
-
-    private function validated(Request $request): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'string', 'max:100'],
-            'price_per_kg' => ['required', 'numeric', 'min:0'],
-            'notes' => ['nullable', 'string', 'max:255'],
-        ]);
     }
 }
