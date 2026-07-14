@@ -3,24 +3,36 @@ import { useState } from 'react';
 
 export default function useResourceForm({ emptyForm, storeUrl, updateUrl, deleteUrl, mapRowToForm }) {
     const [editingId, setEditingId] = useState(null);
-    const { data, setData, post, patch, processing, errors, reset } = useForm(emptyForm);
+    const [showModal, setShowModal] = useState(false);
+    const { data, setData, post, patch, processing, errors, reset, clearErrors } = useForm(emptyForm);
+
+    function openCreate() {
+        setEditingId(null);
+        reset();
+        clearErrors();
+        setShowModal(true);
+    }
 
     function startEdit(row) {
         setEditingId(row.id);
         setData(mapRowToForm(row));
+        clearErrors();
+        setShowModal(true);
     }
 
-    function cancelEdit() {
+    function closeModal() {
+        setShowModal(false);
         setEditingId(null);
         reset();
+        clearErrors();
     }
 
     function submit(e) {
         e.preventDefault();
         if (editingId) {
-            patch(updateUrl(editingId), { preserveScroll: true, onSuccess: () => cancelEdit() });
+            patch(updateUrl(editingId), { preserveScroll: true, onSuccess: () => closeModal() });
         } else {
-            post(storeUrl, { preserveScroll: true, onSuccess: () => reset() });
+            post(storeUrl, { preserveScroll: true, onSuccess: () => closeModal() });
         }
     }
 
@@ -29,5 +41,5 @@ export default function useResourceForm({ emptyForm, storeUrl, updateUrl, delete
         router.delete(deleteUrl(row.id), { preserveScroll: true });
     }
 
-    return { data, setData, errors, processing, editingId, startEdit, cancelEdit, submit, destroy };
+    return { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy };
 }

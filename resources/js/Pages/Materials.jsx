@@ -5,6 +5,7 @@ import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
 import Select from '@/Components/Form/Select';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import Modal from '@/Components/Overlays/Modal';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
@@ -12,7 +13,7 @@ import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { ExternalLink, Layers, Pencil, Trash2 } from 'lucide-react';
+import { ExternalLink, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 
 const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', notes: '', purchase_url: '' };
 
@@ -44,7 +45,7 @@ const columns = [
 
 export default function Materials({ materials }) {
     const { flash } = usePage().props;
-    const { data, setData, errors, processing, editingId, startEdit, cancelEdit, submit, destroy } = useResourceForm({
+    const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/materiais',
         updateUrl: (id) => `/materiais/${id}`,
@@ -65,42 +66,15 @@ export default function Materials({ materials }) {
             <div className="space-y-6">
                 <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
 
-                <Card title={editingId ? 'Editar material' : 'Novo material'}>
-                    <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <FormField label="Nome" error={errors.name}>
-                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                        </FormField>
-                        <FormField label="Tipo" error={errors.type}>
-                            <Select value={data.type} onChange={(e) => setData('type', e.target.value)}>
-                                <option>Filamento</option>
-                                <option>Resina</option>
-                                <option>Outro</option>
-                            </Select>
-                        </FormField>
-                        <FormField label="Preço por kg (R$)" error={errors.price_per_kg}>
-                            <Input type="number" step="0.01" value={data.price_per_kg} onChange={(e) => setData('price_per_kg', e.target.value)} />
-                        </FormField>
-                        <FormField label="Observações" error={errors.notes}>
-                            <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
-                        </FormField>
-                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2 lg:col-span-2">
-                            <Input
-                                type="url"
-                                placeholder="https://..."
-                                value={data.purchase_url}
-                                onChange={(e) => setData('purchase_url', e.target.value)}
-                            />
-                        </FormField>
-                        <div className="flex items-center gap-2 lg:col-span-4">
-                            <PrimaryButton type="submit" disabled={processing}>
-                                {editingId ? 'Salvar alterações' : 'Adicionar material'}
-                            </PrimaryButton>
-                            {editingId && <SecondaryButton onClick={cancelEdit}>Cancelar</SecondaryButton>}
-                        </div>
-                    </form>
-                </Card>
-
-                <Card title="Seus materiais" delay={0.05}>
+                <Card
+                    title="Seus materiais"
+                    subtitle="Filamentos e resinas usados nos seus cálculos de custo."
+                    action={
+                        <PrimaryButton onClick={openCreate}>
+                            <Plus size={16} /> Novo material
+                        </PrimaryButton>
+                    }
+                >
                     <DataTable
                         columns={columns}
                         rows={materials}
@@ -126,6 +100,53 @@ export default function Materials({ materials }) {
                     />
                 </Card>
             </div>
+
+            <Modal show={showModal} onClose={closeModal} maxWidth="xl">
+                <form onSubmit={submit} className="p-6 sm:p-8">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                        {editingId ? 'Editar material' : 'Novo material'}
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        {editingId ? 'Atualize os dados do material.' : 'Preencha os dados do material que você usa.'}
+                    </p>
+
+                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <FormField label="Nome" error={errors.name}>
+                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
+                        </FormField>
+                        <FormField label="Tipo" error={errors.type}>
+                            <Select value={data.type} onChange={(e) => setData('type', e.target.value)}>
+                                <option>Filamento</option>
+                                <option>Resina</option>
+                                <option>Outro</option>
+                            </Select>
+                        </FormField>
+                        <FormField label="Preço por kg (R$)" error={errors.price_per_kg}>
+                            <Input type="number" step="0.01" value={data.price_per_kg} onChange={(e) => setData('price_per_kg', e.target.value)} />
+                        </FormField>
+                        <FormField label="Observações" error={errors.notes}>
+                            <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
+                        </FormField>
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2">
+                            <Input
+                                type="url"
+                                placeholder="https://..."
+                                value={data.purchase_url}
+                                onChange={(e) => setData('purchase_url', e.target.value)}
+                            />
+                        </FormField>
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-end gap-3">
+                        <SecondaryButton type="button" onClick={closeModal}>
+                            Cancelar
+                        </SecondaryButton>
+                        <PrimaryButton type="submit" disabled={processing}>
+                            {editingId ? 'Salvar alterações' : 'Adicionar material'}
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
         </>
     );
 }

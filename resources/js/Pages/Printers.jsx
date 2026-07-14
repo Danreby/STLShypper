@@ -4,6 +4,7 @@ import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import Modal from '@/Components/Overlays/Modal';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
@@ -11,7 +12,7 @@ import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { ExternalLink, Pencil, Printer as PrinterIcon, Trash2 } from 'lucide-react';
+import { ExternalLink, Pencil, Plus, Printer as PrinterIcon, Trash2 } from 'lucide-react';
 
 const emptyForm = {
     name: '',
@@ -58,7 +59,7 @@ const columns = [
 
 export default function Printers({ printers }) {
     const { flash } = usePage().props;
-    const { data, setData, errors, processing, editingId, startEdit, cancelEdit, submit, destroy } = useResourceForm({
+    const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/impressoras',
         updateUrl: (id) => `/impressoras/${id}`,
@@ -80,41 +81,15 @@ export default function Printers({ printers }) {
             <div className="space-y-6">
                 <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
 
-                <Card title={editingId ? 'Editar impressora' : 'Nova impressora'}>
-                    <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        <FormField label="Nome" error={errors.name}>
-                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                        </FormField>
-                        <FormField label="Preço de compra (R$)" error={errors.purchase_price}>
-                            <Input type="number" step="0.01" value={data.purchase_price} onChange={(e) => setData('purchase_price', e.target.value)} />
-                        </FormField>
-                        <FormField label="Vida útil (horas)" error={errors.useful_life_hours}>
-                            <Input type="number" value={data.useful_life_hours} onChange={(e) => setData('useful_life_hours', e.target.value)} />
-                        </FormField>
-                        <FormField label="Potência (W)" error={errors.power_w}>
-                            <Input type="number" value={data.power_w} onChange={(e) => setData('power_w', e.target.value)} />
-                        </FormField>
-                        <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance}>
-                            <Input type="number" step="0.01" value={data.annual_maintenance} onChange={(e) => setData('annual_maintenance', e.target.value)} />
-                        </FormField>
-                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2 lg:col-span-2">
-                            <Input
-                                type="url"
-                                placeholder="https://..."
-                                value={data.purchase_url}
-                                onChange={(e) => setData('purchase_url', e.target.value)}
-                            />
-                        </FormField>
-                        <div className="flex items-center gap-2 lg:col-span-5">
-                            <PrimaryButton type="submit" disabled={processing}>
-                                {editingId ? 'Salvar alterações' : 'Adicionar impressora'}
-                            </PrimaryButton>
-                            {editingId && <SecondaryButton onClick={cancelEdit}>Cancelar</SecondaryButton>}
-                        </div>
-                    </form>
-                </Card>
-
-                <Card title="Suas impressoras" delay={0.05}>
+                <Card
+                    title="Suas impressoras"
+                    subtitle="Cadastro usado para calcular depreciação e custo de máquina por hora."
+                    action={
+                        <PrimaryButton onClick={openCreate}>
+                            <Plus size={16} /> Nova impressora
+                        </PrimaryButton>
+                    }
+                >
                     <DataTable
                         columns={columns}
                         rows={printers}
@@ -140,6 +115,52 @@ export default function Printers({ printers }) {
                     />
                 </Card>
             </div>
+
+            <Modal show={showModal} onClose={closeModal} maxWidth="2xl">
+                <form onSubmit={submit} className="p-6 sm:p-8">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                        {editingId ? 'Editar impressora' : 'Nova impressora'}
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        {editingId ? 'Atualize os dados da impressora.' : 'Preencha os dados da sua impressora.'}
+                    </p>
+
+                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <FormField label="Nome" error={errors.name} className="sm:col-span-2">
+                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
+                        </FormField>
+                        <FormField label="Preço de compra (R$)" error={errors.purchase_price}>
+                            <Input type="number" step="0.01" value={data.purchase_price} onChange={(e) => setData('purchase_price', e.target.value)} />
+                        </FormField>
+                        <FormField label="Vida útil (horas)" error={errors.useful_life_hours}>
+                            <Input type="number" value={data.useful_life_hours} onChange={(e) => setData('useful_life_hours', e.target.value)} />
+                        </FormField>
+                        <FormField label="Potência (W)" error={errors.power_w}>
+                            <Input type="number" value={data.power_w} onChange={(e) => setData('power_w', e.target.value)} />
+                        </FormField>
+                        <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance}>
+                            <Input type="number" step="0.01" value={data.annual_maintenance} onChange={(e) => setData('annual_maintenance', e.target.value)} />
+                        </FormField>
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2">
+                            <Input
+                                type="url"
+                                placeholder="https://..."
+                                value={data.purchase_url}
+                                onChange={(e) => setData('purchase_url', e.target.value)}
+                            />
+                        </FormField>
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-end gap-3">
+                        <SecondaryButton type="button" onClick={closeModal}>
+                            Cancelar
+                        </SecondaryButton>
+                        <PrimaryButton type="submit" disabled={processing}>
+                            {editingId ? 'Salvar alterações' : 'Adicionar impressora'}
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
         </>
     );
 }
