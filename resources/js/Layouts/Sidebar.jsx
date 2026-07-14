@@ -1,4 +1,5 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import ScrollArea from '@/Components/ScrollArea';
 import { navigation } from './navigation';
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
@@ -49,7 +50,7 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
                 </button>
             </div>
 
-            <nav className="mt-2 flex flex-1 flex-col gap-1 overflow-y-auto px-3 scrollbar-thin">
+            <ScrollArea as="nav" fade className="mt-2 flex flex-1 flex-col gap-1 px-3">
                 {navigation.map((item) => {
                     const active = route().current(item.routeName);
                     const Icon = item.icon;
@@ -79,7 +80,7 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
                         </Link>
                     );
                 })}
-            </nav>
+            </ScrollArea>
         </motion.aside>
     );
 }
