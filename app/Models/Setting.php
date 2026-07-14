@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
-    'kwh_price', 'labor_rate', 'failure_pct', 'extra_material_pct',
-    'tax_pct', 'fee_pct', 'margin_pct', 'hours_per_year',
-])]
 class Setting extends Model
 {
+    protected $fillable = [
+        'user_id', 'kwh_price', 'labor_rate', 'failure_pct', 'extra_material_pct',
+        'tax_pct', 'fee_pct', 'margin_pct', 'hours_per_year',
+    ];
+
     protected function casts(): array
     {
         return [

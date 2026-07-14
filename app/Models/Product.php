@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
-    'name', 'printer_id', 'material_id', 'piece_weight_g', 'print_time_h',
-    'labor_cost', 'extra_fixed_costs', 'quantity',
-    'extra_material_pct', 'failure_pct', 'tax_pct', 'fee_pct', 'margin_pct',
-])]
 class Product extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id', 'name', 'printer_id', 'material_id', 'piece_weight_g', 'print_time_h',
+        'labor_cost', 'extra_fixed_costs', 'quantity',
+        'extra_material_pct', 'failure_pct', 'tax_pct', 'fee_pct', 'margin_pct',
+    ];
 
     protected function casts(): array
     {

@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable([
-    'name', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance',
-])]
 class Printer extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id', 'name', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance',
+    ];
 
     protected function casts(): array
     {

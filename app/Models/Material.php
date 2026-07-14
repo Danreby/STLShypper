@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'type', 'price_per_kg', 'notes'])]
 class Material extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['user_id', 'name', 'type', 'price_per_kg', 'notes'];
 
     protected function casts(): array
     {
