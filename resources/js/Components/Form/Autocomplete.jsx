@@ -2,7 +2,7 @@ import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOption
 import { inputClass } from '@/Utils/inputStyles';
 import { parseOptions } from '@/Utils/parseSelectOptions';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Autocomplete({ className = '', children, value, onChange, disabled = false, name, placeholder = 'Buscar...' }) {
@@ -24,21 +24,34 @@ export default function Autocomplete({ className = '', children, value, onChange
                 <>
                     <div className="relative">
                         <ComboboxInput
-                            className={`${inputClass} pr-9 ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
+                            className={`${inputClass} ${selected ? 'pr-14' : 'pr-9'} ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
                             displayValue={() => selected?.label ?? ''}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder={placeholder}
                             autoComplete="off"
                         />
-                        <ComboboxButton className="focus-ring absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500">
-                            <motion.span
-                                animate={{ rotate: open ? 180 : 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex items-center"
-                            >
-                                <ChevronDown size={16} />
-                            </motion.span>
-                        </ComboboxButton>
+                        <div className="absolute inset-y-0 right-0 flex items-center gap-0.5 pr-2">
+                            {selected && !disabled && (
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    onClick={() => handleChange(null)}
+                                    title="Limpar"
+                                    className="focus-ring flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300"
+                                >
+                                    <X size={13} />
+                                </button>
+                            )}
+                            <ComboboxButton className="focus-ring flex h-6 w-6 items-center justify-center text-slate-400 dark:text-slate-500">
+                                <motion.span
+                                    animate={{ rotate: open ? 180 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center"
+                                >
+                                    <ChevronDown size={16} />
+                                </motion.span>
+                            </ComboboxButton>
+                        </div>
                     </div>
 
                     <AnimatePresence>

@@ -1,3 +1,4 @@
+import Autocomplete from '@/Components/Form/Autocomplete';
 import Input from '@/Components/Form/Input';
 import Select from '@/Components/Form/Select';
 import { router } from '@inertiajs/react';
@@ -5,19 +6,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ListFilter, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-/**
- * Generic, backend-driven filter bar: a debounced search box plus any number
- * of dynamic <select> filters, all reflected in the URL query string. Every
- * change is sent to the server (`routeName`) which does the actual
- * filtering — this component only manages the UI/debounce, never filters
- * data on the client.
- *
- * @param {object} props
- * @param {string} props.routeName - named route to `router.get` on change (e.g. "materials.index").
- * @param {object} props.filters - current filter values from the backend (e.g. { search, type }).
- * @param {{ name: string, label: string, allLabel?: string, options: { value: string, label: string }[] }[]} [props.selects]
- * @param {string} [props.searchPlaceholder]
- */
 export default function FilterBar({ routeName, filters, selects = [], searchPlaceholder = 'Buscar...' }) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [selectValues, setSelectValues] = useState(() => {
@@ -76,18 +64,25 @@ export default function FilterBar({ routeName, filters, selects = [], searchPlac
                 <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={searchPlaceholder} className="pl-9" />
             </div>
 
-            {selects.map((s) => (
-                <div key={s.name} className="sm:w-48">
-                    <Select value={selectValues[s.name]} onChange={(e) => handleSelectChange(s.name, e.target.value)}>
-                        <option value="">{s.allLabel ?? `Todos: ${s.label}`}</option>
-                        {s.options.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </Select>
-                </div>
-            ))}
+            {selects.map((s) => {
+                const SelectComponent = s.searchable ? Autocomplete : Select;
+                return (
+                    <div key={s.name} className="sm:w-48">
+                        <SelectComponent
+                            value={selectValues[s.name]}
+                            onChange={(e) => handleSelectChange(s.name, e.target.value)}
+                            placeholder={s.allLabel ?? `Todos: ${s.label}`}
+                        >
+                            {!s.searchable && <option value="">{s.allLabel ?? `Todos: ${s.label}`}</option>}
+                            {s.options.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </SelectComponent>
+                    </div>
+                );
+            })}
 
             <AnimatePresence>
                 {hasActiveFilters && (

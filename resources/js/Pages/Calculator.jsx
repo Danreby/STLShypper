@@ -2,8 +2,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/DataDisplay/Card';
 import FormField from '@/Components/Form/FormField';
 import AlertError from '@/Components/Feedback/AlertError';
+import Autocomplete from '@/Components/Form/Autocomplete';
 import Input from '@/Components/Form/Input';
-import Select from '@/Components/Form/Select';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import { formatCurrency, formatPercent, toPercentInput, fromPercentInput } from '@/Utils/format';
 import { Head } from '@inertiajs/react';
@@ -36,9 +36,6 @@ export default function Calculator({ printers, materials, settings }) {
         return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
     }
 
-    // Chamada axios (JSON) para a rota /calculadora/calcular — cálculo em
-    // tempo real, sem navegação de página (diferente do Inertia, que é
-    // usado para o restante da navegação do app).
     async function handleCalculate(e) {
         e.preventDefault();
         setError('');
@@ -77,21 +74,19 @@ export default function Calculator({ printers, materials, settings }) {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <FormField label="Impressora">
-                                    <Select required value={form.printer_id} onChange={updateField('printer_id')}>
-                                        <option value="" disabled>Selecione...</option>
+                                    <Autocomplete value={form.printer_id} onChange={updateField('printer_id')} placeholder="Buscar impressora...">
                                         {printers.map((p) => (
                                             <option key={p.id} value={p.id}>{p.name}</option>
                                         ))}
-                                    </Select>
+                                    </Autocomplete>
                                 </FormField>
 
                                 <FormField label="Material">
-                                    <Select required value={form.material_id} onChange={updateField('material_id')}>
-                                        <option value="" disabled>Selecione...</option>
+                                    <Autocomplete value={form.material_id} onChange={updateField('material_id')} placeholder="Buscar material...">
                                         {materials.map((m) => (
                                             <option key={m.id} value={m.id}>{m.name}</option>
                                         ))}
-                                    </Select>
+                                    </Autocomplete>
                                 </FormField>
 
                                 <FormField label="Peso da peça (g)">

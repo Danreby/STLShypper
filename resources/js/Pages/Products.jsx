@@ -3,8 +3,8 @@ import Card from '@/Components/DataDisplay/Card';
 import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import StatCard from '@/Components/DataDisplay/StatCard';
+import Autocomplete from '@/Components/Form/Autocomplete';
 import Input from '@/Components/Form/Input';
-import Select from '@/Components/Form/Select';
 import DataTable from '@/Components/DataDisplay/DataTable';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
@@ -98,12 +98,14 @@ export default function Products({ products, printers, materials, filters, total
                                 name: 'printer_id',
                                 label: 'Impressora',
                                 allLabel: 'Todas as impressoras',
+                                searchable: true,
                                 options: printers.map((p) => ({ value: String(p.id), label: p.name })),
                             },
                             {
                                 name: 'material_id',
                                 label: 'Material',
                                 allLabel: 'Todos os materiais',
+                                searchable: true,
                                 options: materials.map((m) => ({ value: String(m.id), label: m.name })),
                             },
                         ]}
@@ -149,16 +151,22 @@ export default function Products({ products, printers, materials, filters, total
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
                         </FormField>
                         <FormField label="Impressora" error={errors.printer_id}>
-                            <Select value={data.printer_id} onChange={(e) => setData('printer_id', e.target.value)}>
-                                <option value="">Selecione...</option>
+                            <Autocomplete
+                                value={data.printer_id}
+                                onChange={(e) => setData('printer_id', e.target.value)}
+                                placeholder="Buscar impressora..."
+                            >
                                 {printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                            </Select>
+                            </Autocomplete>
                         </FormField>
                         <FormField label="Material" error={errors.material_id}>
-                            <Select value={data.material_id} onChange={(e) => setData('material_id', e.target.value)}>
-                                <option value="">Selecione...</option>
+                            <Autocomplete
+                                value={data.material_id}
+                                onChange={(e) => setData('material_id', e.target.value)}
+                                placeholder="Buscar material..."
+                            >
                                 {materials.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                            </Select>
+                            </Autocomplete>
                         </FormField>
                         <FormField label="Quantidade" error={errors.quantity}>
                             <Input type="number" min="1" value={data.quantity} onChange={(e) => setData('quantity', e.target.value)} />
