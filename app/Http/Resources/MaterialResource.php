@@ -19,6 +19,7 @@ class MaterialResource extends JsonResource
             'price_per_kg' => (float) $this->price_per_kg,
             'price_per_gram' => round($this->pricePerGram(), 4),
             'notes' => $this->notes,
+            'purchase_url' => $this->purchase_url,
         ];
     }
 }

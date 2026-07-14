@@ -12,7 +12,7 @@ class Printer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'name', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance',
+        'user_id', 'name', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance', 'purchase_url',
     ];
 
     protected function casts(): array

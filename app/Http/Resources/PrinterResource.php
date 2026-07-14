@@ -24,6 +24,7 @@ class PrinterResource extends JsonResource
             'useful_life_hours' => $this->useful_life_hours,
             'power_w' => $this->power_w,
             'annual_maintenance' => (float) $this->annual_maintenance,
+            'purchase_url' => $this->purchase_url,
             'depreciation_per_hour' => round($this->depreciationPerHour(), 4),
             'maintenance_per_hour' => round($this->maintenancePerHour($this->hoursPerYear), 4),
             'total_cost_per_hour' => round($this->totalCostPerHour($this->hoursPerYear), 4),
