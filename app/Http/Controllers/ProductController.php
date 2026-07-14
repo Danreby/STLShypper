@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\SortsRows;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use App\Services\UserSettingsResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +15,19 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    use SortsRows;
+
+    /** Chave pública de ordenação (?sort=) => caminho dentro do ProductResource. */
+    private const SORTABLE = [
+        'name' => 'name',
+        'printer_name' => 'printer_name',
+        'material_name' => 'material_name',
+        'quantity' => 'quantity',
+        'cost' => 'pricing.cost_with_losses',
+        'price' => 'pricing.suggested_price_per_unit',
+        'profit' => 'pricing.total_profit',
+    ];
+
     public function __construct(private readonly UserSettingsResolver $settingsResolver)
     {
     }
@@ -22,20 +37,20 @@ class ProductController extends Controller
         $user = $request->user();
         $settings = $this->settingsResolver->forUser($user);
         $filters = $request->only(['search', 'printer_id', 'material_id']);
+        $sort = $request->input('sort');
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
 
-        $products = $user->products()
-            ->with(['printer', 'material'])
-            ->filter($filters)
-            ->orderBy('name')
-            ->get();
+        $products = $user->products()->with(['printer', 'material'])->filter($filters)->get();
 
-        $rows = $products->map(fn ($product) => (new ProductResource($product, $settings))->resolve());
+        $rows = $products->map(fn (Product $product) => (new ProductResource($product, $settings))->resolve());
+
+        $sortedRows = $this->sortRows($rows, $sort, $direction, self::SORTABLE, 'name');
 
         return Inertia::render('Products', [
-            'products' => $rows,
+            'products' => $sortedRows,
             'printers' => $user->printers()->orderBy('name')->get(['id', 'name']),
             'materials' => $user->materials()->orderBy('name')->get(['id', 'name']),
-            'filters' => $filters,
+            'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],
             'totals' => [
                 'total_revenue' => round($rows->sum(fn ($r) => $r['pricing']['total_price']), 2),
                 'total_profit' => round($rows->sum(fn ($r) => $r['pricing']['total_profit']), 2),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\SortsRows;
 use App\Http\Requests\Material\StoreMaterialRequest;
 use App\Http\Requests\Material\UpdateMaterialRequest;
 use App\Http\Resources\MaterialResource;
@@ -13,21 +14,38 @@ use Inertia\Response;
 
 class MaterialController extends Controller
 {
+    use SortsRows;
+
+    /** Chave pública de ordenação (?sort=) => caminho dentro do MaterialResource. */
+    private const SORTABLE = [
+        'name' => 'name',
+        'type' => 'type',
+        'price_per_kg' => 'price_per_kg',
+        'price_per_gram' => 'price_per_gram',
+    ];
+
     public function index(Request $request): Response
     {
         $filters = $request->only(['search', 'type']);
+        $sort = $request->input('sort');
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
 
-        $materials = $request->user()->materials()
-            ->filter($filters)
-            ->orderBy('name')
-            ->get();
+        $materials = $request->user()->materials()->filter($filters)->get();
+
+        $rows = $this->sortRows(
+            $materials->map(fn (Material $material) => (new MaterialResource($material))->resolve()),
+            $sort,
+            $direction,
+            self::SORTABLE,
+            'name'
+        );
 
         $types = $request->user()->materials()->distinct()->orderBy('type')->pluck('type');
 
         return Inertia::render('Materials', [
-            'materials' => MaterialResource::collection($materials),
+            'materials' => $rows,
             'types' => $types,
-            'filters' => $filters,
+            'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],
         ]);
     }
 
