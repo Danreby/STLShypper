@@ -4,6 +4,7 @@ import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
@@ -57,7 +58,7 @@ const columns = [
     },
 ];
 
-export default function Printers({ printers }) {
+export default function Printers({ printers, filters }) {
     const { flash } = usePage().props;
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
@@ -90,10 +91,12 @@ export default function Printers({ printers }) {
                         </PrimaryButton>
                     }
                 >
+                    <FilterBar routeName="printers.index" filters={filters} searchPlaceholder="Buscar por nome..." />
+
                     <DataTable
                         columns={columns}
                         rows={printers}
-                        emptyMessage="Nenhuma impressora cadastrada ainda."
+                        emptyMessage="Nenhuma impressora encontrada."
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button

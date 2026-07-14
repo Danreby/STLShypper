@@ -31,10 +31,6 @@ class Setting extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Valores padrão usados ao criar as configurações de um novo usuário.
-     * Espelham a aba "Parâmetros Gerais" da planilha original.
-     */
     public static function defaults(): array
     {
         return [

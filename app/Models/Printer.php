@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,9 +36,6 @@ class Printer extends Model
         return $this->hasMany(Product::class);
     }
 
-    /**
-     * Depreciação por hora (R$/h) = Preço de compra / Vida útil (h).
-     */
     public function depreciationPerHour(): float
     {
         $hours = (float) $this->useful_life_hours;
@@ -45,19 +43,18 @@ class Printer extends Model
         return $hours > 0 ? (float) $this->purchase_price / $hours : 0.0;
     }
 
-    /**
-     * Manutenção por hora (R$/h) = Manutenção anual / Horas de uso por ano.
-     */
     public function maintenancePerHour(int $hoursPerYear): float
     {
         return $hoursPerYear > 0 ? (float) $this->annual_maintenance / $hoursPerYear : 0.0;
     }
 
-    /**
-     * Custo total de máquina por hora (R$/h) = depreciação/h + manutenção/h.
-     */
     public function totalCostPerHour(int $hoursPerYear): float
     {
         return $this->depreciationPerHour() + $this->maintenancePerHour($hoursPerYear);
+    }
+
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query->when($filters['search'] ?? null, fn (Builder $q, string $search) => $q->where('name', 'like', "%{$search}%"));
     }
 }

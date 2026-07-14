@@ -37,9 +37,12 @@ export default function AuthenticatedLayout({ header, children }) {
                 <Topbar user={user} header={header} onOpenMobileMenu={() => setMobileMenuOpen(true)} />
 
                 <main className="flex-1">
+                    {/* Keyed by pathname only (not the query string) so that filter/search
+                        updates on a page — which change the URL's query params — don't replay
+                        the full-page fade; only an actual navigation to a different page does. */}
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
-                            key={url}
+                            key={url.split('?')[0]}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}

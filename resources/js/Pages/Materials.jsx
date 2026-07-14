@@ -5,6 +5,7 @@ import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
 import Select from '@/Components/Form/Select';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
@@ -43,7 +44,7 @@ const columns = [
     },
 ];
 
-export default function Materials({ materials }) {
+export default function Materials({ materials, types, filters }) {
     const { flash } = usePage().props;
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
@@ -75,10 +76,24 @@ export default function Materials({ materials }) {
                         </PrimaryButton>
                     }
                 >
+                    <FilterBar
+                        routeName="materials.index"
+                        filters={filters}
+                        searchPlaceholder="Buscar por nome..."
+                        selects={[
+                            {
+                                name: 'type',
+                                label: 'Tipo',
+                                allLabel: 'Todos os tipos',
+                                options: types.map((type) => ({ value: type, label: type })),
+                            },
+                        ]}
+                    />
+
                     <DataTable
                         columns={columns}
                         rows={materials}
-                        emptyMessage="Nenhum material cadastrado ainda."
+                        emptyMessage="Nenhum material encontrado."
                         actions={(m) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button

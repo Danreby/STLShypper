@@ -20,10 +20,16 @@ class PrinterController extends Controller
     public function index(Request $request): Response
     {
         $hoursPerYear = (int) $this->settingsResolver->forUser($request->user())->hours_per_year;
+        $filters = $request->only(['search']);
+
+        $printers = $request->user()->printers()
+            ->filter($filters)
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('Printers', [
-            'printers' => $request->user()->printers()->orderBy('name')->get()
-                ->map(fn ($printer) => (new PrinterResource($printer, $hoursPerYear))->resolve()),
+            'printers' => $printers->map(fn ($printer) => (new PrinterResource($printer, $hoursPerYear))->resolve()),
+            'filters' => $filters,
         ]);
     }
 

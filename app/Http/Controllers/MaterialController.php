@@ -15,10 +15,19 @@ class MaterialController extends Controller
 {
     public function index(Request $request): Response
     {
+        $filters = $request->only(['search', 'type']);
+
+        $materials = $request->user()->materials()
+            ->filter($filters)
+            ->orderBy('name')
+            ->get();
+
+        $types = $request->user()->materials()->distinct()->orderBy('type')->pluck('type');
+
         return Inertia::render('Materials', [
-            'materials' => MaterialResource::collection(
-                $request->user()->materials()->orderBy('name')->get()
-            ),
+            'materials' => MaterialResource::collection($materials),
+            'types' => $types,
+            'filters' => $filters,
         ]);
     }
 

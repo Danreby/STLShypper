@@ -6,6 +6,7 @@ import StatCard from '@/Components/DataDisplay/StatCard';
 import Input from '@/Components/Form/Input';
 import Select from '@/Components/Form/Select';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
@@ -43,7 +44,7 @@ const columns = [
     { key: 'profit', header: 'Lucro total', render: (p) => formatCurrency(p.pricing.total_profit) },
 ];
 
-export default function Products({ products, printers, materials, totals }) {
+export default function Products({ products, printers, materials, filters, totals }) {
     const { flash } = usePage().props;
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
@@ -88,10 +89,30 @@ export default function Products({ products, printers, materials, totals }) {
                         </PrimaryButton>
                     }
                 >
+                    <FilterBar
+                        routeName="products.index"
+                        filters={filters}
+                        searchPlaceholder="Buscar por nome..."
+                        selects={[
+                            {
+                                name: 'printer_id',
+                                label: 'Impressora',
+                                allLabel: 'Todas as impressoras',
+                                options: printers.map((p) => ({ value: String(p.id), label: p.name })),
+                            },
+                            {
+                                name: 'material_id',
+                                label: 'Material',
+                                allLabel: 'Todos os materiais',
+                                options: materials.map((m) => ({ value: String(m.id), label: m.name })),
+                            },
+                        ]}
+                    />
+
                     <DataTable
                         columns={columns}
                         rows={products}
-                        emptyMessage="Nenhum produto cadastrado ainda."
+                        emptyMessage="Nenhum produto encontrado."
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button

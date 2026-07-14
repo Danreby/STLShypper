@@ -21,8 +21,13 @@ class ProductController extends Controller
     {
         $user = $request->user();
         $settings = $this->settingsResolver->forUser($user);
+        $filters = $request->only(['search', 'printer_id', 'material_id']);
 
-        $products = $user->products()->with(['printer', 'material'])->orderBy('name')->get();
+        $products = $user->products()
+            ->with(['printer', 'material'])
+            ->filter($filters)
+            ->orderBy('name')
+            ->get();
 
         $rows = $products->map(fn ($product) => (new ProductResource($product, $settings))->resolve());
 
@@ -30,6 +35,7 @@ class ProductController extends Controller
             'products' => $rows,
             'printers' => $user->printers()->orderBy('name')->get(['id', 'name']),
             'materials' => $user->materials()->orderBy('name')->get(['id', 'name']),
+            'filters' => $filters,
             'totals' => [
                 'total_revenue' => round($rows->sum(fn ($r) => $r['pricing']['total_price']), 2),
                 'total_profit' => round($rows->sum(fn ($r) => $r['pricing']['total_profit']), 2),
