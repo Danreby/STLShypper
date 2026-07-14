@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
-export default function FormField({ label, hint, error, children }) {
+export default function FormField({ label, hint, error, children, className = '' }) {
     return (
-        <label className="block">
+        <label className={`block ${className}`}>
             <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
             {children}
             {hint && <span className="mt-1.5 block text-xs text-slate-500 dark:text-slate-400">{hint}</span>}

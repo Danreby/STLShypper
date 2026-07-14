@@ -12,9 +12,9 @@ import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { Layers, Pencil, Trash2 } from 'lucide-react';
+import { ExternalLink, Layers, Pencil, Trash2 } from 'lucide-react';
 
-const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', notes: '' };
+const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', notes: '', purchase_url: '' };
 
 const columns = [
     { key: 'name', header: 'Nome' },
@@ -22,6 +22,24 @@ const columns = [
     { key: 'price_per_kg', header: 'Preço/kg', render: (m) => formatCurrency(m.price_per_kg) },
     { key: 'price_per_gram', header: 'Preço/g', render: (m) => formatCurrency(m.price_per_gram) },
     { key: 'notes', header: 'Observações', render: (m) => m.notes ?? '—' },
+    {
+        key: 'purchase_url',
+        header: 'Link',
+        render: (m) =>
+            m.purchase_url ? (
+                <a
+                    href={m.purchase_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir link de compra"
+                    className="focus-ring inline-flex items-center gap-1 rounded-lg text-brand-600 hover:underline dark:text-accent-400"
+                >
+                    <ExternalLink size={14} /> Comprar
+                </a>
+            ) : (
+                <span className="text-slate-400 dark:text-slate-500">—</span>
+            ),
+    },
 ];
 
 export default function Materials({ materials }) {
@@ -36,6 +54,7 @@ export default function Materials({ materials }) {
             type: material.type,
             price_per_kg: material.price_per_kg,
             notes: material.notes ?? '',
+            purchase_url: material.purchase_url ?? '',
         }),
     });
 
@@ -63,6 +82,14 @@ export default function Materials({ materials }) {
                         </FormField>
                         <FormField label="Observações" error={errors.notes}>
                             <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
+                        </FormField>
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2 lg:col-span-2">
+                            <Input
+                                type="url"
+                                placeholder="https://..."
+                                value={data.purchase_url}
+                                onChange={(e) => setData('purchase_url', e.target.value)}
+                            />
                         </FormField>
                         <div className="flex items-center gap-2 lg:col-span-4">
                             <PrimaryButton type="submit" disabled={processing}>

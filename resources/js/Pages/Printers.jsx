@@ -11,7 +11,7 @@ import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { Pencil, Printer as PrinterIcon, Trash2 } from 'lucide-react';
+import { ExternalLink, Pencil, Printer as PrinterIcon, Trash2 } from 'lucide-react';
 
 const emptyForm = {
     name: '',
@@ -19,6 +19,7 @@ const emptyForm = {
     useful_life_hours: 8000,
     power_w: '',
     annual_maintenance: '',
+    purchase_url: '',
 };
 
 const columns = [
@@ -35,6 +36,24 @@ const columns = [
         render: (p) => formatCurrency(p.total_cost_per_hour),
         className: 'py-2.5 pr-4 font-semibold text-slate-800 dark:text-slate-100',
     },
+    {
+        key: 'purchase_url',
+        header: 'Link',
+        render: (p) =>
+            p.purchase_url ? (
+                <a
+                    href={p.purchase_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir link de compra"
+                    className="focus-ring inline-flex items-center gap-1 rounded-lg text-brand-600 hover:underline dark:text-accent-400"
+                >
+                    <ExternalLink size={14} /> Comprar
+                </a>
+            ) : (
+                <span className="text-slate-400 dark:text-slate-500">—</span>
+            ),
+    },
 ];
 
 export default function Printers({ printers }) {
@@ -50,6 +69,7 @@ export default function Printers({ printers }) {
             useful_life_hours: printer.useful_life_hours,
             power_w: printer.power_w,
             annual_maintenance: printer.annual_maintenance,
+            purchase_url: printer.purchase_url ?? '',
         }),
     });
 
@@ -76,6 +96,14 @@ export default function Printers({ printers }) {
                         </FormField>
                         <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance}>
                             <Input type="number" step="0.01" value={data.annual_maintenance} onChange={(e) => setData('annual_maintenance', e.target.value)} />
+                        </FormField>
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2 lg:col-span-2">
+                            <Input
+                                type="url"
+                                placeholder="https://..."
+                                value={data.purchase_url}
+                                onChange={(e) => setData('purchase_url', e.target.value)}
+                            />
                         </FormField>
                         <div className="flex items-center gap-2 lg:col-span-5">
                             <PrimaryButton type="submit" disabled={processing}>

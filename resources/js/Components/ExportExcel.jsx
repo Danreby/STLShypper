@@ -19,7 +19,7 @@ const CURRENCY_FMT = 'R$ #,##0.00';
 const PERCENT_FMT = '0.00%';
 const INTEGER_FMT = '#,##0';
 
-function decorateSheet(worksheet, { currencyCols = [], percentCols = [], integerCols = [], boldRowIndexes = [] } = {}) {
+function decorateSheet(worksheet, { currencyCols = [], percentCols = [], integerCols = [], hyperlinkCols = [], boldRowIndexes = [] } = {}) {
     const ref = worksheet['!ref'];
     if (!ref) return worksheet;
 
@@ -51,6 +51,7 @@ function decorateSheet(worksheet, { currencyCols = [], percentCols = [], integer
     const currencySet = new Set(currencyCols);
     const percentSet = new Set(percentCols);
     const integerSet = new Set(integerCols);
+    const hyperlinkSet = new Set(hyperlinkCols);
 
     for (let r = range.s.r + 1; r <= range.e.r; r++) {
         const isTotalRow = boldRowIndexes.includes(r);
@@ -66,6 +67,11 @@ function decorateSheet(worksheet, { currencyCols = [], percentCols = [], integer
                 if (currencySet.has(headerName)) style.numFmt = CURRENCY_FMT;
                 else if (percentSet.has(headerName)) style.numFmt = PERCENT_FMT;
                 else if (integerSet.has(headerName)) style.numFmt = INTEGER_FMT;
+            }
+
+            if (hyperlinkSet.has(headerName) && cell.v) {
+                cell.l = { Target: String(cell.v), Tooltip: 'Abrir link de compra' };
+                style.font = { color: { rgb: '2563eb' }, underline: true };
             }
 
             if (isTotalRow) {
@@ -131,11 +137,13 @@ function buildWorkbook({ settings, printers, materials, products, summary }) {
                 'Depreciação (R$/h)': p.depreciation_per_hour,
                 'Manutenção (R$/h)': p.maintenance_per_hour,
                 'Custo Máquina Total (R$/h)': p.total_cost_per_hour,
+                'Link de Compra': p.purchase_url ?? '',
             })),
         ),
         {
             currencyCols: ['Preço de Compra (R$)', 'Manutenção Anual (R$)', 'Depreciação (R$/h)', 'Manutenção (R$/h)', 'Custo Máquina Total (R$/h)'],
             integerCols: ['Vida Útil (h)', 'Potência (W)'],
+            hyperlinkCols: ['Link de Compra'],
         },
     );
     XLSX.utils.book_append_sheet(workbook, impressoras, 'Impressoras');
@@ -148,9 +156,10 @@ function buildWorkbook({ settings, printers, materials, products, summary }) {
                 'Preço/kg (R$)': m.price_per_kg,
                 'Preço/g (R$)': m.price_per_gram,
                 Observações: m.notes ?? '',
+                'Link de Compra': m.purchase_url ?? '',
             })),
         ),
-        { currencyCols: ['Preço/kg (R$)', 'Preço/g (R$)'] },
+        { currencyCols: ['Preço/kg (R$)', 'Preço/g (R$)'], hyperlinkCols: ['Link de Compra'] },
     );
     XLSX.utils.book_append_sheet(workbook, materiaisSheet, 'Materiais');
 
