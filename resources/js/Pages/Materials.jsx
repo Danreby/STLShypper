@@ -7,6 +7,7 @@ import Select from '@/Components/Form/Select';
 import DataTable from '@/Components/DataDisplay/DataTable';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
+import Pagination from '@/Components/Pagination';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
@@ -45,7 +46,7 @@ const columns = [
     },
 ];
 
-export default function Materials({ materials, types, filters }) {
+export default function Materials({ materials, types, filters, pagination }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('materials.index', filters);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
@@ -118,6 +119,8 @@ export default function Materials({ materials, types, filters }) {
                             </div>
                         )}
                     />
+
+                    <Pagination routeName="materials.index" filters={filters} pagination={pagination} />
                 </Card>
             </div>
 

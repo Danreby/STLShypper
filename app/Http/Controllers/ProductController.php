@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\PaginatesRows;
 use App\Http\Controllers\Concerns\SortsRows;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
@@ -15,6 +16,7 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    use PaginatesRows;
     use SortsRows;
 
     /** Chave pública de ordenação (?sort=) => caminho dentro do ProductResource. */
@@ -45,9 +47,16 @@ class ProductController extends Controller
         $rows = $products->map(fn (Product $product) => (new ProductResource($product, $settings))->resolve());
 
         $sortedRows = $this->sortRows($rows, $sort, $direction, self::SORTABLE, 'name');
+        $paginator = $this->paginateRows($sortedRows, $request);
 
         return Inertia::render('Products', [
-            'products' => $sortedRows,
+            'products' => $paginator->items(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
             'printers' => $user->printers()->orderBy('name')->get(['id', 'name']),
             'materials' => $user->materials()->orderBy('name')->get(['id', 'name']),
             'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],

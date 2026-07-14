@@ -6,6 +6,7 @@ import Input from '@/Components/Form/Input';
 import DataTable from '@/Components/DataDisplay/DataTable';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
+import Pagination from '@/Components/Pagination';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
@@ -60,7 +61,7 @@ const columns = [
     },
 ];
 
-export default function Printers({ printers, filters }) {
+export default function Printers({ printers, filters, pagination }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('printers.index', filters);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
@@ -122,6 +123,8 @@ export default function Printers({ printers, filters }) {
                             </div>
                         )}
                     />
+
+                    <Pagination routeName="printers.index" filters={filters} pagination={pagination} />
                 </Card>
             </div>
 

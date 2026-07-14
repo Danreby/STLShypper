@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\PaginatesRows;
 use App\Http\Controllers\Concerns\SortsRows;
 use App\Http\Requests\Printer\StorePrinterRequest;
 use App\Http\Requests\Printer\UpdatePrinterRequest;
@@ -15,6 +16,7 @@ use Inertia\Response;
 
 class PrinterController extends Controller
 {
+    use PaginatesRows;
     use SortsRows;
 
     /** Chave pública de ordenação (?sort=) => caminho dentro do PrinterResource. */
@@ -50,8 +52,16 @@ class PrinterController extends Controller
             'name'
         );
 
+        $paginator = $this->paginateRows($rows, $request);
+
         return Inertia::render('Printers', [
-            'printers' => $rows,
+            'printers' => $paginator->items(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
             'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],
         ]);
     }

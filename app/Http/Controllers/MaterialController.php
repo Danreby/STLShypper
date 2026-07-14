@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\PaginatesRows;
 use App\Http\Controllers\Concerns\SortsRows;
 use App\Http\Requests\Material\StoreMaterialRequest;
 use App\Http\Requests\Material\UpdateMaterialRequest;
@@ -14,6 +15,7 @@ use Inertia\Response;
 
 class MaterialController extends Controller
 {
+    use PaginatesRows;
     use SortsRows;
 
     /** Chave pública de ordenação (?sort=) => caminho dentro do MaterialResource. */
@@ -42,8 +44,16 @@ class MaterialController extends Controller
 
         $types = $request->user()->materials()->distinct()->orderBy('type')->pluck('type');
 
+        $paginator = $this->paginateRows($rows, $request);
+
         return Inertia::render('Materials', [
-            'materials' => $rows,
+            'materials' => $paginator->items(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
             'types' => $types,
             'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],
         ]);

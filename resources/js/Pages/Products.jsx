@@ -8,6 +8,7 @@ import Input from '@/Components/Form/Input';
 import DataTable from '@/Components/DataDisplay/DataTable';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
+import Pagination from '@/Components/Pagination';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
@@ -58,7 +59,7 @@ const columns = [
     { key: 'profit', header: 'Lucro total', sortable: true, render: (p) => formatCurrency(p.pricing.total_profit) },
 ];
 
-export default function Products({ products, printers, materials, filters, totals }) {
+export default function Products({ products, printers, materials, filters, pagination, totals }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('products.index', filters);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
@@ -152,6 +153,8 @@ export default function Products({ products, printers, materials, filters, total
                             </div>
                         )}
                     />
+
+                    <Pagination routeName="products.index" filters={filters} pagination={pagination} />
                 </Card>
             </div>
 
