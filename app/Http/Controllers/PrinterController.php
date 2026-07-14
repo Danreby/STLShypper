@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Printer\StorePrinterRequest;
 use App\Http\Requests\Printer\UpdatePrinterRequest;
 use App\Http\Resources\PrinterResource;
+use App\Services\UserSettingsResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,12 +13,17 @@ use Inertia\Response;
 
 class PrinterController extends Controller
 {
+    public function __construct(private readonly UserSettingsResolver $settingsResolver)
+    {
+    }
+
     public function index(Request $request): Response
     {
+        $hoursPerYear = (int) $this->settingsResolver->forUser($request->user())->hours_per_year;
+
         return Inertia::render('Printers', [
-            'printers' => PrinterResource::collection(
-                $request->user()->printers()->orderBy('name')->get()
-            ),
+            'printers' => $request->user()->printers()->orderBy('name')->get()
+                ->map(fn ($printer) => (new PrinterResource($printer, $hoursPerYear))->resolve()),
         ]);
     }
 

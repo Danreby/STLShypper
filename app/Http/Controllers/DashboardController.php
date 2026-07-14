@@ -30,12 +30,14 @@ class DashboardController extends Controller
         $totalRevenue = round($priced->sum(fn ($p) => $p['pricing']['total_price']), 2);
         $totalCost = round($priced->sum(fn ($p) => $p['pricing']['cost_with_losses'] * $p['pricing']['quantity']), 2);
         $totalProfit = round($priced->sum(fn ($p) => $p['pricing']['total_profit']), 2);
+        $totalQuantity = (int) $priced->sum(fn ($p) => $p['pricing']['quantity']);
 
         return Inertia::render('Dashboard', [
             'stats' => [
                 'printers_count' => $user->printers()->count(),
                 'materials_count' => $user->materials()->count(),
                 'products_count' => $products->count(),
+                'total_quantity' => $totalQuantity,
                 'total_revenue' => $totalRevenue,
                 'total_cost' => $totalCost,
                 'total_profit' => $totalProfit,

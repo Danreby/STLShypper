@@ -7,6 +7,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PrinterResource extends JsonResource
 {
+    public function __construct(\App\Models\Printer $resource, private readonly int $hoursPerYear)
+    {
+        parent::__construct($resource);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -20,6 +25,8 @@ class PrinterResource extends JsonResource
             'power_w' => $this->power_w,
             'annual_maintenance' => (float) $this->annual_maintenance,
             'depreciation_per_hour' => round($this->depreciationPerHour(), 4),
+            'maintenance_per_hour' => round($this->maintenancePerHour($this->hoursPerYear), 4),
+            'total_cost_per_hour' => round($this->totalCostPerHour($this->hoursPerYear), 4),
         ];
     }
 }

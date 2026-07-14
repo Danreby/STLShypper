@@ -28,6 +28,13 @@ const columns = [
     { key: 'power_w', header: 'Potência', render: (p) => `${p.power_w} W` },
     { key: 'annual_maintenance', header: 'Manutenção/ano', render: (p) => formatCurrency(p.annual_maintenance) },
     { key: 'depreciation_per_hour', header: 'Depreciação/h', render: (p) => formatCurrency(p.depreciation_per_hour) },
+    { key: 'maintenance_per_hour', header: 'Manutenção/h', render: (p) => formatCurrency(p.maintenance_per_hour) },
+    {
+        key: 'total_cost_per_hour',
+        header: 'Custo máquina/h',
+        render: (p) => formatCurrency(p.total_cost_per_hour),
+        className: 'py-2.5 pr-4 font-semibold text-slate-800 dark:text-slate-100',
+    },
 ];
 
 export default function Printers({ printers }) {

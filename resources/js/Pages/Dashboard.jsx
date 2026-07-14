@@ -2,10 +2,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/Card';
 import StatCard from '@/Components/StatCard';
 import PageHeading from '@/Components/PageHeading';
+import ExportExcel from '@/Components/ExportExcel';
 import { formatCurrency, formatPercent } from '@/Utils/format';
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
+    Boxes,
     Calculator,
     LayoutDashboard,
     Layers,
@@ -29,16 +31,19 @@ export default function Dashboard({ stats, topProducts }) {
                     className="relative overflow-hidden rounded-3xl bg-linear-to-br from-brand-600 via-brand-500 to-accent-500 p-6 text-white shadow-xl shadow-brand-500/25 sm:p-8"
                 >
                     <div className="absolute -top-16 -right-10 h-56 w-56 animate-float rounded-full bg-white/10 blur-3xl" />
-                    <div className="relative flex flex-col gap-1">
-                        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium">
-                            <Sparkles size={13} /> Visão geral do seu negócio
-                        </span>
-                        <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-                            Sua operação de impressão 3D em números
-                        </h2>
-                        <p className="mt-1 max-w-xl text-sm text-white/80">
-                            Acompanhe receita, custos e margem em tempo real, calculados a partir dos seus parâmetros gerais.
-                        </p>
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="flex flex-col gap-1">
+                            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium">
+                                <Sparkles size={13} /> Visão geral do seu negócio
+                            </span>
+                            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+                                Sua operação de impressão 3D em números
+                            </h2>
+                            <p className="mt-1 max-w-xl text-sm text-white/80">
+                                Acompanhe receita, custos e margem em tempo real, calculados a partir dos seus parâmetros gerais.
+                            </p>
+                        </div>
+                        <ExportExcel variant="on-dark" className="sm:shrink-0" />
                     </div>
                 </motion.div>
 
@@ -49,7 +54,8 @@ export default function Dashboard({ stats, topProducts }) {
                     <StatCard label="Margem média" value={stats.margin_pct} format={formatPercent} icon={TrendingUp} accent delay={0.15} />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <StatCard label="Quantidade total de peças" value={stats.total_quantity} icon={Boxes} delay={0} />
                     <StatCard label="Receita total estimada" value={stats.total_revenue} format={formatCurrency} accent delay={0.05} />
                     <StatCard label="Custo total estimado" value={stats.total_cost} format={formatCurrency} delay={0.1} />
                     <StatCard label="Lucro total estimado" value={stats.total_profit} format={formatCurrency} accent delay={0.15} />

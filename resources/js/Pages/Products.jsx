@@ -9,6 +9,7 @@ import DataTable from '@/Components/DataTable';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import PageHeading from '@/Components/PageHeading';
+import ExportExcel from '@/Components/ExportExcel';
 import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
@@ -67,9 +68,14 @@ export default function Products({ products, printers, materials, totals }) {
             <div className="space-y-6">
                 <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <StatCard label="Receita total estimada" value={totals.total_revenue} format={formatCurrency} accent />
-                    <StatCard label="Lucro total estimado" value={totals.total_profit} format={formatCurrency} accent delay={0.05} />
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">
+                    <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+                        <StatCard label="Receita total estimada" value={totals.total_revenue} format={formatCurrency} accent />
+                        <StatCard label="Lucro total estimado" value={totals.total_profit} format={formatCurrency} accent delay={0.05} />
+                    </div>
+                    <div className="flex items-center justify-end sm:justify-center">
+                        <ExportExcel />
+                    </div>
                 </div>
 
                 <Card title={editingId ? 'Editar produto' : 'Novo produto'} delay={0.05}>

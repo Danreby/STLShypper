@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PrinterController;
 use App\Http\Controllers\ProductController;
@@ -17,12 +18,12 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Perfil do usuário (nome/e-mail/senha) - scaffolding padrão do Breeze
+    // Perfil do usuário
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Parâmetros Gerais de precificação (kWh, mão de obra, perdas, impostos, taxas, margem)
+    // Parâmetros Gerais
     Route::get('/parametros', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/parametros', [SettingsController::class, 'update'])->name('settings.update');
 
@@ -38,17 +39,20 @@ Route::middleware('auth')->group(function () {
     Route::patch('/materiais/{material}', [MaterialController::class, 'update'])->name('materials.update');
     Route::delete('/materiais/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
-    // Produtos (Tabela de Produtos da planilha)
+    // Produtos
     Route::get('/produtos', [ProductController::class, 'index'])->name('products.index');
     Route::post('/produtos', [ProductController::class, 'store'])->name('products.store');
     Route::patch('/produtos/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/produtos/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-    // Calculadora (1 Peça) - página via Inertia + cálculo ao vivo via axios (JSON)
+    // Calculadora
     Route::get('/calculadora', [CalculatorController::class, 'index'])->name('calculator.index');
     Route::post('/calculadora/calcular', [CalculatorController::class, 'compute'])
         ->middleware('throttle:60,1')
         ->name('calculator.compute');
+
+    // Exportação da planilha completa (Parâmetros, Impressoras, Materiais, Produtos, Resumo)
+    Route::get('/exportar', [ExportController::class, 'index'])->name('export.index');
 });
 
 require __DIR__.'/auth.php';

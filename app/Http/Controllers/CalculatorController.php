@@ -29,8 +29,11 @@ class CalculatorController extends Controller
         $user = $request->user();
         $settings = $this->settingsResolver->forUser($user);
 
+        $hoursPerYear = (int) $settings->hours_per_year;
+
         return Inertia::render('Calculator', [
-            'printers' => PrinterResource::collection($user->printers()->orderBy('name')->get()),
+            'printers' => $user->printers()->orderBy('name')->get()
+                ->map(fn ($printer) => (new PrinterResource($printer, $hoursPerYear))->resolve()),
             'materials' => MaterialResource::collection($user->materials()->orderBy('name')->get()),
             'settings' => new SettingResource($settings),
         ]);
