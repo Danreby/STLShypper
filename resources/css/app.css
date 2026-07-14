@@ -57,18 +57,45 @@
 }
 
 @layer utilities {
-    /* Thin, theme-aware scrollbars used inside sidebars / tables */
+    /* Thin, theme-aware, brand-tinted scrollbars used across the app (see ScrollArea component) */
     .scrollbar-thin {
         scrollbar-width: thin;
-        scrollbar-color: rgb(148 163 184 / 0.4) transparent;
+        scrollbar-color: rgb(148 163 184 / 0.5) transparent;
     }
     .scrollbar-thin::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
     }
     .scrollbar-thin::-webkit-scrollbar-thumb {
-        background-color: rgb(148 163 184 / 0.4);
+        background-color: rgb(148 163 184 / 0.5);
         border-radius: 9999px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(99 102 241 / 0.6);
+    }
+    .dark .scrollbar-thin {
+        scrollbar-color: rgb(100 116 139 / 0.5) transparent;
+    }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: rgb(100 116 139 / 0.5);
+    }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(129 140 248 / 0.6);
+    }
+
+    /* Static edge fade to hint at scrollable overflow (paired with ScrollArea's `fade` prop) */
+    .scroll-fade-y {
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+    }
+    .scroll-fade-x {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
     }
 
     .text-gradient-brand {

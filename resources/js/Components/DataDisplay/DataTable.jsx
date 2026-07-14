@@ -1,3 +1,4 @@
+import ScrollArea from '@/Components/ScrollArea';
 import { motion } from 'framer-motion';
 
 /**
@@ -14,7 +15,7 @@ export default function DataTable({ columns, rows, actions, emptyMessage, rowKey
     const colSpan = columns.length + (actions ? 1 : 0);
 
     return (
-        <div className="-mx-5 overflow-x-auto px-5 sm:-mx-6 sm:px-6">
+        <ScrollArea direction="horizontal" fade className="-mx-5 px-5 sm:-mx-6 sm:px-6">
             <table className="w-full text-left text-sm">
                 <thead>
                     <tr className="border-b border-slate-200/70 text-xs uppercase tracking-wide text-slate-500 dark:border-white/10 dark:text-slate-400">
@@ -60,6 +61,6 @@ export default function DataTable({ columns, rows, actions, emptyMessage, rowKey
                     )}
                 </tbody>
             </table>
-        </div>
+        </ScrollArea>
     );
 }

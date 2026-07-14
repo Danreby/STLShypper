@@ -1,4 +1,5 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import ScrollArea from '@/Components/ScrollArea';
 import { navigation } from './navigation';
 import { Link } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -40,7 +41,7 @@ export default function MobileDrawer({ open, onClose }) {
                             </button>
                         </div>
 
-                        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-2 scrollbar-thin">
+                        <ScrollArea as="nav" fade className="flex flex-1 flex-col gap-1 px-3 py-2">
                             {navigation.map((item, index) => {
                                 const active = route().current(item.routeName);
                                 const Icon = item.icon;
@@ -66,7 +67,7 @@ export default function MobileDrawer({ open, onClose }) {
                                     </motion.div>
                                 );
                             })}
-                        </nav>
+                        </ScrollArea>
                     </motion.div>
                 </>
             )}
