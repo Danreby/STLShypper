@@ -106,6 +106,13 @@
         @apply border border-slate-200/70 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60;
     }
 
+    /* Floating menus/dropdowns (Select, user menu, etc.) get a near-opaque
+       surface instead of the glassy `.surface-panel` — they render above
+       arbitrary content, so contrast matters more than translucency there. */
+    .menu-panel {
+        @apply border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800;
+    }
+
     .focus-ring {
         @apply outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950;
     }

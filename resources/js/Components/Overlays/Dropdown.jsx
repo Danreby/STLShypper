@@ -60,7 +60,7 @@ const Content = ({ align = 'right', width = '48', children }) => {
                     exit={{ opacity: 0, scale: 0.95, y: -6 }}
                     transition={{ duration: 0.15, ease: 'easeOut' }}
                     onClick={() => setOpen(false)}
-                    className={`surface-panel absolute z-50 mt-2 overflow-hidden rounded-2xl p-1.5 shadow-xl shadow-slate-900/10 ${alignmentClasses} ${widthClasses}`}
+                    className={`menu-panel absolute z-50 mt-2 overflow-hidden rounded-2xl p-1.5 shadow-xl shadow-slate-900/10 ${alignmentClasses} ${widthClasses}`}
                 >
                     {children}
                 </motion.div>

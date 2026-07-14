@@ -36,14 +36,14 @@ export default function Select({ className = '', children, value, onChange, disa
     return (
         <Listbox value={stringValue} onChange={handleChange} disabled={disabled}>
             {({ open }) => (
-                <div className="relative w-full">
+                <>
                     <ListboxButton
                         className={`${inputClass} flex w-full items-center justify-between gap-2 text-left ${
                             disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
                         } ${className}`}
                     >
                         <span className={`truncate ${!selected || selected.disabled ? 'text-slate-400 dark:text-slate-500' : ''}`}>
-                            {selected ? selected.label : (placeholder ?? ' ')}
+                            {selected ? selected.label : (placeholder ?? ' ')}
                         </span>
                         <motion.span
                             animate={{ rotate: open ? 180 : 0 }}
@@ -54,16 +54,19 @@ export default function Select({ className = '', children, value, onChange, disa
                         </motion.span>
                     </ListboxButton>
 
+                    {/* Anchored + portaled: escapes any transformed ancestor (e.g. animated
+                        Cards) so the panel never gets clipped or buried under later siblings. */}
                     <AnimatePresence>
                         {open && (
                             <ListboxOptions
                                 static
+                                anchor={{ to: 'bottom start', gap: 8 }}
                                 as={motion.div}
                                 initial={{ opacity: 0, scale: 0.97, y: -4 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.97, y: -4 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                                className="surface-panel scrollbar-thin absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-2xl p-1.5 shadow-xl shadow-slate-900/10 focus:outline-none"
+                                className="menu-panel scrollbar-thin z-50 max-h-60 w-(--button-width) overflow-auto rounded-2xl p-1.5 shadow-xl shadow-slate-900/10 focus:outline-none"
                             >
                                 {options.map((option) => (
                                     <ListboxOption
@@ -91,7 +94,7 @@ export default function Select({ className = '', children, value, onChange, disa
                             </ListboxOptions>
                         )}
                     </AnimatePresence>
-                </div>
+                </>
             )}
         </Listbox>
     );
