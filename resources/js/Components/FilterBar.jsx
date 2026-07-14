@@ -18,7 +18,9 @@ export default function FilterBar({ routeName, filters, selects = [], searchPlac
     const isFirstRender = useRef(true);
 
     function apply(overrides = {}) {
-        const params = { search, ...selectValues, ...overrides };
+        // Spreading `filters` first carries forward anything this component doesn't
+        // manage itself — namely `sort`/`direction` set by the table's column headers.
+        const params = { ...filters, search, ...selectValues, ...overrides };
         Object.keys(params).forEach((key) => {
             if (!params[key]) delete params[key];
         });
@@ -48,7 +50,13 @@ export default function FilterBar({ routeName, filters, selects = [], searchPlac
             cleared[s.name] = '';
         });
         setSelectValues(cleared);
-        router.get(route(routeName), {}, { preserveState: true, preserveScroll: true, replace: true });
+
+        // Clearing filters shouldn't reset the table's sort order — keep it.
+        const params = { sort: filters.sort, direction: filters.direction };
+        Object.keys(params).forEach((key) => {
+            if (!params[key]) delete params[key];
+        });
+        router.get(route(routeName), params, { preserveState: true, preserveScroll: true, replace: true });
     }
 
     const hasActiveFilters = !!search || Object.values(selectValues).some(Boolean);

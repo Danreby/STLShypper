@@ -11,6 +11,7 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import useResourceForm from '@/Hooks/useResourceForm';
+import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
@@ -19,10 +20,10 @@ import { ExternalLink, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', notes: '', purchase_url: '' };
 
 const columns = [
-    { key: 'name', header: 'Nome' },
-    { key: 'type', header: 'Tipo' },
-    { key: 'price_per_kg', header: 'Preço/kg', render: (m) => formatCurrency(m.price_per_kg) },
-    { key: 'price_per_gram', header: 'Preço/g', render: (m) => formatCurrency(m.price_per_gram) },
+    { key: 'name', header: 'Nome', sortable: true },
+    { key: 'type', header: 'Tipo', sortable: true },
+    { key: 'price_per_kg', header: 'Preço/kg', sortable: true, render: (m) => formatCurrency(m.price_per_kg) },
+    { key: 'price_per_gram', header: 'Preço/g', sortable: true, render: (m) => formatCurrency(m.price_per_gram) },
     { key: 'notes', header: 'Observações', render: (m) => m.notes ?? '—' },
     {
         key: 'purchase_url',
@@ -46,6 +47,7 @@ const columns = [
 
 export default function Materials({ materials, types, filters }) {
     const { flash } = usePage().props;
+    const { sort, direction, onSort } = useSort('materials.index', filters);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/materiais',
@@ -93,6 +95,9 @@ export default function Materials({ materials, types, filters }) {
                     <DataTable
                         columns={columns}
                         rows={materials}
+                        sort={sort}
+                        direction={direction}
+                        onSort={onSort}
                         emptyMessage="Nenhum material encontrado."
                         actions={(m) => (
                             <div className="flex items-center justify-end gap-1">

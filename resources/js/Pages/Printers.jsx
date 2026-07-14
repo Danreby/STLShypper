@@ -10,6 +10,7 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import useResourceForm from '@/Hooks/useResourceForm';
+import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
@@ -25,16 +26,17 @@ const emptyForm = {
 };
 
 const columns = [
-    { key: 'name', header: 'Nome' },
-    { key: 'purchase_price', header: 'Preço', render: (p) => formatCurrency(p.purchase_price) },
-    { key: 'useful_life_hours', header: 'Vida útil', render: (p) => `${p.useful_life_hours} h` },
-    { key: 'power_w', header: 'Potência', render: (p) => `${p.power_w} W` },
-    { key: 'annual_maintenance', header: 'Manutenção/ano', render: (p) => formatCurrency(p.annual_maintenance) },
-    { key: 'depreciation_per_hour', header: 'Depreciação/h', render: (p) => formatCurrency(p.depreciation_per_hour) },
-    { key: 'maintenance_per_hour', header: 'Manutenção/h', render: (p) => formatCurrency(p.maintenance_per_hour) },
+    { key: 'name', header: 'Nome', sortable: true },
+    { key: 'purchase_price', header: 'Preço', sortable: true, render: (p) => formatCurrency(p.purchase_price) },
+    { key: 'useful_life_hours', header: 'Vida útil', sortable: true, render: (p) => `${p.useful_life_hours} h` },
+    { key: 'power_w', header: 'Potência', sortable: true, render: (p) => `${p.power_w} W` },
+    { key: 'annual_maintenance', header: 'Manutenção/ano', sortable: true, render: (p) => formatCurrency(p.annual_maintenance) },
+    { key: 'depreciation_per_hour', header: 'Depreciação/h', sortable: true, render: (p) => formatCurrency(p.depreciation_per_hour) },
+    { key: 'maintenance_per_hour', header: 'Manutenção/h', sortable: true, render: (p) => formatCurrency(p.maintenance_per_hour) },
     {
         key: 'total_cost_per_hour',
         header: 'Custo máquina/h',
+        sortable: true,
         render: (p) => formatCurrency(p.total_cost_per_hour),
         className: 'py-2.5 pr-4 font-semibold text-slate-800 dark:text-slate-100',
     },
@@ -60,6 +62,7 @@ const columns = [
 
 export default function Printers({ printers, filters }) {
     const { flash } = usePage().props;
+    const { sort, direction, onSort } = useSort('printers.index', filters);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/impressoras',
@@ -96,6 +99,9 @@ export default function Printers({ printers, filters }) {
                     <DataTable
                         columns={columns}
                         rows={printers}
+                        sort={sort}
+                        direction={direction}
+                        onSort={onSort}
                         emptyMessage="Nenhuma impressora encontrada."
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">

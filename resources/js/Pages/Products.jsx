@@ -13,6 +13,7 @@ import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import ExportExcel from '@/Components/ExportExcel';
 import useResourceForm from '@/Hooks/useResourceForm';
+import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
@@ -30,22 +31,36 @@ const emptyForm = {
 };
 
 const columns = [
-    { key: 'name', header: 'Produto' },
-    { key: 'printer_name', header: 'Impressora', render: (p) => p.printer_name ?? '—', className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400' },
-    { key: 'material_name', header: 'Material', render: (p) => p.material_name ?? '—', className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400' },
-    { key: 'quantity', header: 'Qtd.' },
-    { key: 'cost', header: 'Custo unitário', render: (p) => formatCurrency(p.pricing.cost_with_losses) },
+    { key: 'name', header: 'Produto', sortable: true },
+    {
+        key: 'printer_name',
+        header: 'Impressora',
+        sortable: true,
+        render: (p) => p.printer_name ?? '—',
+        className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400',
+    },
+    {
+        key: 'material_name',
+        header: 'Material',
+        sortable: true,
+        render: (p) => p.material_name ?? '—',
+        className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400',
+    },
+    { key: 'quantity', header: 'Qtd.', sortable: true },
+    { key: 'cost', header: 'Custo unitário', sortable: true, render: (p) => formatCurrency(p.pricing.cost_with_losses) },
     {
         key: 'price',
         header: 'Preço sugerido',
+        sortable: true,
         render: (p) => formatCurrency(p.pricing.suggested_price_per_unit),
         className: 'py-2.5 pr-4 font-semibold text-emerald-600 dark:text-emerald-400',
     },
-    { key: 'profit', header: 'Lucro total', render: (p) => formatCurrency(p.pricing.total_profit) },
+    { key: 'profit', header: 'Lucro total', sortable: true, render: (p) => formatCurrency(p.pricing.total_profit) },
 ];
 
 export default function Products({ products, printers, materials, filters, totals }) {
     const { flash } = usePage().props;
+    const { sort, direction, onSort } = useSort('products.index', filters);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/produtos',
@@ -114,6 +129,9 @@ export default function Products({ products, printers, materials, filters, total
                     <DataTable
                         columns={columns}
                         rows={products}
+                        sort={sort}
+                        direction={direction}
+                        onSort={onSort}
                         emptyMessage="Nenhum produto encontrado."
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
