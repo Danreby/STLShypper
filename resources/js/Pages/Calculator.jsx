@@ -89,10 +89,13 @@ export default function Calculator({ printers, materials, settings }) {
                                     </Autocomplete>
                                 </FormField>
 
-                                <FormField label="Peso da peça (g)">
+                                <FormField label="Peso da peça (g)" hint="Peso de 1 peça.">
                                     <Input type="number" step="0.01" required value={form.piece_weight_g} onChange={updateField('piece_weight_g')} />
                                 </FormField>
-                                <FormField label="Tempo de impressão (h)">
+                                <FormField
+                                    label="Tempo de impressão total (h)"
+                                    hint="Tempo da mesa inteira (todas as peças da quantidade abaixo). Dividimos pela quantidade para o custo por peça."
+                                >
                                     <Input type="number" step="0.01" required value={form.print_time_h} onChange={updateField('print_time_h')} />
                                 </FormField>
                                 <FormField label="Mão de obra (R$)">
@@ -183,6 +186,12 @@ export default function Calculator({ printers, materials, settings }) {
                                     className="space-y-4"
                                 >
                                     <dl className="space-y-2 text-sm">
+                                        {form.quantity > 1 && (
+                                            <Row
+                                                label="Tempo por peça (rateado)"
+                                                value={`${Number(result.print_time_per_unit_h).toFixed(2)} h`}
+                                            />
+                                        )}
                                         <Row label="Custo do material" value={formatCurrency(result.material_cost)} />
                                         <Row label="Custo de energia" value={formatCurrency(result.energy_cost)} />
                                         <Row label="Custo de depreciação/manutenção" value={formatCurrency(result.machine_cost)} />

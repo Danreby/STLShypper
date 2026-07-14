@@ -18,7 +18,6 @@ class MaterialController extends Controller
     use PaginatesRows;
     use SortsRows;
 
-    /** Chave pública de ordenação (?sort=) => caminho dentro do MaterialResource. */
     private const SORTABLE = [
         'name' => 'name',
         'type' => 'type',

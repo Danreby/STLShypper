@@ -4,37 +4,17 @@ namespace App\Services;
 
 use App\Models\Setting;
 
-/**
- * Reproduz, em PHP, todas as fórmulas da planilha "Precificação de Impressão 3D":
- * custo de material, energia, depreciação/manutenção da máquina, mão de obra,
- * custos fixos, perdas/refugo, impostos, taxas de venda e markup sobre o preço.
- */
 class PricingCalculator
 {
-    /**
-     * @param  array{
-     *     piece_weight_g: float,
-     *     print_time_h: float,
-     *     labor_cost: float,
-     *     extra_fixed_costs: float,
-     *     quantity: int,
-     *     material_price_per_kg: float,
-     *     printer_power_w: float,
-     *     printer_cost_per_hour: float,
-     *     extra_material_pct: float|null,
-     *     failure_pct: float|null,
-     *     tax_pct: float|null,
-     *     fee_pct: float|null,
-     *     margin_pct: float|null,
-     * }  $input
-     */
+
     public static function calculate(array $input, Setting $settings): array
     {
         $pieceWeight = (float) ($input['piece_weight_g'] ?? 0);
-        $printTime = (float) ($input['print_time_h'] ?? 0);
+        $printTimeTotal = (float) ($input['print_time_h'] ?? 0);
         $laborCost = (float) ($input['labor_cost'] ?? 0);
         $extraFixedCosts = (float) ($input['extra_fixed_costs'] ?? 0);
         $quantity = max(1, (int) ($input['quantity'] ?? 1));
+        $printTimePerUnit = $printTimeTotal / $quantity;
         $materialPricePerKg = (float) ($input['material_price_per_kg'] ?? 0);
         $printerPowerW = (float) ($input['printer_power_w'] ?? 0);
         $printerCostPerHour = (float) ($input['printer_cost_per_hour'] ?? 0);
@@ -45,28 +25,21 @@ class PricingCalculator
         $feePct = self::resolve($input['fee_pct'] ?? null, $settings->fee_pct);
         $marginPct = self::resolve($input['margin_pct'] ?? null, $settings->margin_pct);
 
-        // 1. Material: peso total (com purga/suporte) x preço por grama.
         $totalWeight = $pieceWeight * (1 + $extraMaterialPct);
         $materialCost = $totalWeight * $materialPricePerKg / 1000;
 
-        // 2. Energia: potência (W) x tempo (h) x valor do kWh, convertendo Wh -> kWh.
-        $energyCost = $printerPowerW * $printTime * (float) $settings->kwh_price / 1000;
+        $energyCost = $printerPowerW * $printTimePerUnit * (float) $settings->kwh_price / 1000;
 
-        // 3. Depreciação + manutenção da impressora, rateada por hora de impressão.
-        $machineCost = $printerCostPerHour * $printTime;
+        $machineCost = $printerCostPerHour * $printTimePerUnit;
 
-        // 4. Subtotal de custos diretos.
         $subtotal = $materialCost + $energyCost + $machineCost + $laborCost + $extraFixedCosts;
 
-        // 5. Custo total considerando a taxa de perdas/falhas de impressão.
         $costWithLosses = $failurePct < 1
             ? $subtotal / (1 - $failurePct)
             : $subtotal;
 
-        // 6. Preço mínimo (markup simples: custo + margem sobre o próprio custo).
         $minPriceSimpleMarkup = $costWithLosses * (1 + $marginPct);
 
-        // 7. Preço sugerido (markup divisor: impostos, taxas e margem como % do preço final).
         $denominator = 1 - $taxPct - $feePct - $marginPct;
         $suggestedPrice = $denominator > 0 ? $costWithLosses / $denominator : 0.0;
 
@@ -77,6 +50,8 @@ class PricingCalculator
         return [
             'extra_material_pct' => round($extraMaterialPct, 4),
             'total_weight_g' => round($totalWeight, 2),
+            'print_time_total_h' => round($printTimeTotal, 2),
+            'print_time_per_unit_h' => round($printTimePerUnit, 4),
             'material_cost' => round($materialCost, 2),
             'energy_cost' => round($energyCost, 2),
             'machine_cost' => round($machineCost, 2),
@@ -100,11 +75,6 @@ class PricingCalculator
         ];
     }
 
-    /**
-     * Calcula o preço de um Product (Eloquent), resolvendo impressora e
-     * material relacionados e aplicando os Parâmetros Gerais do usuário
-     * como padrão para qualquer percentual não sobrescrito no produto.
-     */
     public static function calculateForProduct(\App\Models\Product $product, Setting $settings): array
     {
         $printer = $product->printer;

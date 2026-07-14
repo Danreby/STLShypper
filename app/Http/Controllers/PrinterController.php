@@ -19,7 +19,6 @@ class PrinterController extends Controller
     use PaginatesRows;
     use SortsRows;
 
-    /** Chave pública de ordenação (?sort=) => caminho dentro do PrinterResource. */
     private const SORTABLE = [
         'name' => 'name',
         'purchase_price' => 'purchase_price',

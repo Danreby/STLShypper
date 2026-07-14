@@ -18,7 +18,7 @@ import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Package, Pencil, Plus, Trash2 } from 'lucide-react';
 
 const emptyForm = {
     name: '',
@@ -53,7 +53,17 @@ const columns = [
         key: 'price',
         header: 'Preço sugerido',
         sortable: true,
-        render: (p) => formatCurrency(p.pricing.suggested_price_per_unit),
+        render: (p) =>
+            p.pricing.denominator_warning ? (
+                <span
+                    title="Impostos + taxas + margem somam 100% ou mais. Ajuste os parâmetros gerais (ou os deste produto) para calcular um preço válido."
+                    className="inline-flex items-center gap-1 text-red-600 dark:text-red-400"
+                >
+                    <AlertTriangle size={14} /> Ajustar parâmetros
+                </span>
+            ) : (
+                formatCurrency(p.pricing.suggested_price_per_unit)
+            ),
         className: 'py-2.5 pr-4 font-semibold text-emerald-600 dark:text-emerald-400',
     },
     { key: 'profit', header: 'Lucro total', sortable: true, render: (p) => formatCurrency(p.pricing.total_profit) },
@@ -192,10 +202,18 @@ export default function Products({ products, printers, materials, filters, pagin
                         <FormField label="Quantidade" error={errors.quantity}>
                             <Input type="number" min="1" value={data.quantity} onChange={(e) => setData('quantity', e.target.value)} />
                         </FormField>
-                        <FormField label="Peso (g)" error={errors.piece_weight_g}>
+                        <FormField
+                            label="Peso unitário (g)"
+                            // hint="Peso de 1 peça — o custo de material já escala automaticamente pela quantidade."
+                            error={errors.piece_weight_g}
+                        >
                             <Input type="number" step="0.01" value={data.piece_weight_g} onChange={(e) => setData('piece_weight_g', e.target.value)} />
                         </FormField>
-                        <FormField label="Tempo de impressão (h)" error={errors.print_time_h}>
+                        <FormField
+                            label="Tempo de impressão (h)"
+                            // hint="Tempo da mesa inteira, com todas as peças da quantidade abaixo. Dividimos automaticamente pela quantidade para o custo por peça."
+                            error={errors.print_time_h}
+                        >
                             <Input type="number" step="0.01" value={data.print_time_h} onChange={(e) => setData('print_time_h', e.target.value)} />
                         </FormField>
                         <FormField label="Mão de obra (R$)" error={errors.labor_cost}>

@@ -13,11 +13,6 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Aba "Calculadora (1 Peça)" da planilha: simula custo e preço de uma
- * peça avulsa. A página é renderizada via Inertia, mas o cálculo em si
- * é feito por uma chamada axios (JSON) sem recarregar a página.
- */
 class CalculatorController extends Controller
 {
     public function __construct(private readonly UserSettingsResolver $settingsResolver)

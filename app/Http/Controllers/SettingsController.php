@@ -10,10 +10,6 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Parâmetros Gerais de precificação (aba "Parâmetros Gerais" da planilha):
- * valor do kWh, mão de obra, % de perdas, impostos, taxas e margem padrão.
- */
 class SettingsController extends Controller
 {
     public function __construct(private readonly UserSettingsResolver $settingsResolver)

@@ -19,7 +19,6 @@ class ProductController extends Controller
     use PaginatesRows;
     use SortsRows;
 
-    /** Chave pública de ordenação (?sort=) => caminho dentro do ProductResource. */
     private const SORTABLE = [
         'name' => 'name',
         'printer_name' => 'printer_name',

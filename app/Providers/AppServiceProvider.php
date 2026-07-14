@@ -14,25 +14,17 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Gate::policy(Material::class, MaterialPolicy::class);
         Gate::policy(Printer::class, PrinterPolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
 
-        // Sem wrapper "data" — os Resources aqui só alimentam props do
-        // Inertia (SPA interna), não uma API pública versionada.
         JsonResource::withoutWrapping();
     }
 }

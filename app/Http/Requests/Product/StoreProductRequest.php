@@ -12,9 +12,6 @@ class StoreProductRequest extends FormRequest
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $userId = $this->user()->id;

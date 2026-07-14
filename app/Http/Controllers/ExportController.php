@@ -10,12 +10,6 @@ use App\Services\UserSettingsResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * Fornece, em um único payload JSON, todos os dados necessários para o
- * frontend gerar a planilha de exportação (Parâmetros, Impressoras,
- * Materiais, Tabela de Produtos e Resumo), espelhando as abas da
- * planilha original "Precificação de Impressão 3D".
- */
 class ExportController extends Controller
 {
     public function __construct(private readonly UserSettingsResolver $settingsResolver)
