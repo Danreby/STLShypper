@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PageHeading from '@/Components/PageHeading';
+import PageHeading from '@/Components/DataDisplay/PageHeading';
 import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { UserCircle } from 'lucide-react';

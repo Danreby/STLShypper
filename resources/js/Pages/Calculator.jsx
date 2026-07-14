@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import Card from '@/Components/Card';
-import FormField from '@/Components/FormField';
-import AlertError from '@/Components/AlertError';
-import Input from '@/Components/Input';
-import Select from '@/Components/Select';
-import PageHeading from '@/Components/PageHeading';
+import Card from '@/Components/DataDisplay/Card';
+import FormField from '@/Components/Form/FormField';
+import AlertError from '@/Components/Feedback/AlertError';
+import Input from '@/Components/Form/Input';
+import Select from '@/Components/Form/Select';
+import PageHeading from '@/Components/DataDisplay/PageHeading';
 import { formatCurrency, formatPercent, toPercentInput, fromPercentInput } from '@/Utils/format';
 import { Head } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';

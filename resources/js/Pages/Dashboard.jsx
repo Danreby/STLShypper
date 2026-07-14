@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import Card from '@/Components/Card';
-import StatCard from '@/Components/StatCard';
-import PageHeading from '@/Components/PageHeading';
+import Card from '@/Components/DataDisplay/Card';
+import StatCard from '@/Components/DataDisplay/StatCard';
+import PageHeading from '@/Components/DataDisplay/PageHeading';
 import ExportExcel from '@/Components/ExportExcel';
 import { formatCurrency, formatPercent } from '@/Utils/format';
 import { Head, Link } from '@inertiajs/react';

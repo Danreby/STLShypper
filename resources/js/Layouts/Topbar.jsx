@@ -1,4 +1,4 @@
-import Dropdown from '@/Components/Dropdown';
+import Dropdown from '@/Components/Overlays/Dropdown';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Link } from '@inertiajs/react';
 import { ChevronDown, Menu } from 'lucide-react';
