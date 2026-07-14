@@ -5,9 +5,14 @@ import AlertSuccess from '@/Components/AlertSuccess';
 import Input from '@/Components/Input';
 import Select from '@/Components/Select';
 import DataTable from '@/Components/DataTable';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
+import PageHeading from '@/Components/PageHeading';
 import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
+import { AnimatePresence } from 'framer-motion';
+import { Layers, Pencil, Trash2 } from 'lucide-react';
 
 const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', notes: '' };
 
@@ -16,7 +21,7 @@ const columns = [
     { key: 'type', header: 'Tipo' },
     { key: 'price_per_kg', header: 'Preço/kg', render: (m) => formatCurrency(m.price_per_kg) },
     { key: 'price_per_gram', header: 'Preço/g', render: (m) => formatCurrency(m.price_per_gram) },
-    { key: 'notes', header: 'Observações', render: (m) => m.notes, className: 'py-2 pr-4 text-slate-500' },
+    { key: 'notes', header: 'Observações', render: (m) => m.notes ?? '—' },
 ];
 
 export default function Materials({ materials }) {
@@ -35,11 +40,11 @@ export default function Materials({ materials }) {
     });
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-800">Materiais</h2>}>
+        <AuthenticatedLayout header={<PageHeading title="Materiais" icon={Layers} />}>
             <Head title="Materiais" />
 
-            <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                {flash?.success && <AlertSuccess message={flash.success} />}
+            <div className="space-y-6">
+                <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
 
                 <Card title={editingId ? 'Editar material' : 'Novo material'}>
                     <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -59,29 +64,37 @@ export default function Materials({ materials }) {
                         <FormField label="Observações" error={errors.notes}>
                             <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
                         </FormField>
-                        <div className="flex items-end gap-2 lg:col-span-4">
-                            <button type="submit" disabled={processing} className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+                        <div className="flex items-center gap-2 lg:col-span-4">
+                            <PrimaryButton type="submit" disabled={processing}>
                                 {editingId ? 'Salvar alterações' : 'Adicionar material'}
-                            </button>
-                            {editingId && (
-                                <button type="button" onClick={cancelEdit} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                    Cancelar
-                                </button>
-                            )}
+                            </PrimaryButton>
+                            {editingId && <SecondaryButton onClick={cancelEdit}>Cancelar</SecondaryButton>}
                         </div>
                     </form>
                 </Card>
 
-                <Card title="Seus materiais">
+                <Card title="Seus materiais" delay={0.05}>
                     <DataTable
                         columns={columns}
                         rows={materials}
                         emptyMessage="Nenhum material cadastrado ainda."
                         actions={(m) => (
-                            <>
-                                <button onClick={() => startEdit(m)} className="mr-3 text-slate-600 hover:underline">Editar</button>
-                                <button onClick={() => destroy(m, `Remover o material "${m.name}"?`)} className="text-red-600 hover:underline">Remover</button>
-                            </>
+                            <div className="flex items-center justify-end gap-1">
+                                <button
+                                    onClick={() => startEdit(m)}
+                                    title="Editar"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-accent-400"
+                                >
+                                    <Pencil size={15} />
+                                </button>
+                                <button
+                                    onClick={() => destroy(m, `Remover o material "${m.name}"?`)}
+                                    title="Remover"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                                >
+                                    <Trash2 size={15} />
+                                </button>
+                            </div>
                         )}
                     />
                 </Card>

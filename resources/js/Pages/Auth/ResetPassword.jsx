@@ -23,11 +23,14 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <GuestLayout>
-            <Head title="Reset Password" />
+            <Head title="Redefinir senha" />
 
-            <form onSubmit={submit}>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Redefinir senha</h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Escolha uma nova senha para sua conta.</p>
+
+            <form onSubmit={submit} className="mt-6 space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="E-mail" />
 
                     <TextInput
                         id="email"
@@ -42,8 +45,8 @@ export default function ResetPassword({ token, email }) {
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div>
+                    <InputLabel htmlFor="password" value="Nova senha" />
 
                     <TextInput
                         id="password"
@@ -59,11 +62,8 @@ export default function ResetPassword({ token, email }) {
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
+                <div>
+                    <InputLabel htmlFor="password_confirmation" value="Confirmar senha" />
 
                     <TextInput
                         type="password"
@@ -72,22 +72,15 @@ export default function ResetPassword({ token, email }) {
                         value={data.password_confirmation}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
                     />
 
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                    <InputError message={errors.password_confirmation} className="mt-2" />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full" disabled={processing}>
+                    Redefinir senha
+                </PrimaryButton>
             </form>
         </GuestLayout>
     );

@@ -4,9 +4,14 @@ import FormField from '@/Components/FormField';
 import AlertSuccess from '@/Components/AlertSuccess';
 import Input from '@/Components/Input';
 import DataTable from '@/Components/DataTable';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
+import PageHeading from '@/Components/PageHeading';
 import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
+import { AnimatePresence } from 'framer-motion';
+import { Pencil, Printer as PrinterIcon, Trash2 } from 'lucide-react';
 
 const emptyForm = {
     name: '',
@@ -42,11 +47,11 @@ export default function Printers({ printers }) {
     });
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-800">Impressoras</h2>}>
+        <AuthenticatedLayout header={<PageHeading title="Impressoras" icon={PrinterIcon} />}>
             <Head title="Impressoras" />
 
-            <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                {flash?.success && <AlertSuccess message={flash.success} />}
+            <div className="space-y-6">
+                <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
 
                 <Card title={editingId ? 'Editar impressora' : 'Nova impressora'}>
                     <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -65,29 +70,37 @@ export default function Printers({ printers }) {
                         <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance}>
                             <Input type="number" step="0.01" value={data.annual_maintenance} onChange={(e) => setData('annual_maintenance', e.target.value)} />
                         </FormField>
-                        <div className="flex items-end gap-2 lg:col-span-5">
-                            <button type="submit" disabled={processing} className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+                        <div className="flex items-center gap-2 lg:col-span-5">
+                            <PrimaryButton type="submit" disabled={processing}>
                                 {editingId ? 'Salvar alterações' : 'Adicionar impressora'}
-                            </button>
-                            {editingId && (
-                                <button type="button" onClick={cancelEdit} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                    Cancelar
-                                </button>
-                            )}
+                            </PrimaryButton>
+                            {editingId && <SecondaryButton onClick={cancelEdit}>Cancelar</SecondaryButton>}
                         </div>
                     </form>
                 </Card>
 
-                <Card title="Suas impressoras">
+                <Card title="Suas impressoras" delay={0.05}>
                     <DataTable
                         columns={columns}
                         rows={printers}
                         emptyMessage="Nenhuma impressora cadastrada ainda."
                         actions={(p) => (
-                            <>
-                                <button onClick={() => startEdit(p)} className="mr-3 text-slate-600 hover:underline">Editar</button>
-                                <button onClick={() => destroy(p, `Remover a impressora "${p.name}"?`)} className="text-red-600 hover:underline">Remover</button>
-                            </>
+                            <div className="flex items-center justify-end gap-1">
+                                <button
+                                    onClick={() => startEdit(p)}
+                                    title="Editar"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-accent-400"
+                                >
+                                    <Pencil size={15} />
+                                </button>
+                                <button
+                                    onClick={() => destroy(p, `Remover a impressora "${p.name}"?`)}
+                                    title="Remover"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                                >
+                                    <Trash2 size={15} />
+                                </button>
+                            </div>
                         )}
                     />
                 </Card>

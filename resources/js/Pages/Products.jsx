@@ -6,9 +6,14 @@ import StatCard from '@/Components/StatCard';
 import Input from '@/Components/Input';
 import Select from '@/Components/Select';
 import DataTable from '@/Components/DataTable';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
+import PageHeading from '@/Components/PageHeading';
 import useResourceForm from '@/Hooks/useResourceForm';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
+import { AnimatePresence } from 'framer-motion';
+import { Package, Pencil, Trash2 } from 'lucide-react';
 
 const emptyForm = {
     name: '',
@@ -23,11 +28,16 @@ const emptyForm = {
 
 const columns = [
     { key: 'name', header: 'Produto' },
-    { key: 'printer_name', header: 'Impressora', render: (p) => p.printer_name ?? '—', className: 'py-2 pr-4 text-slate-500' },
-    { key: 'material_name', header: 'Material', render: (p) => p.material_name ?? '—', className: 'py-2 pr-4 text-slate-500' },
+    { key: 'printer_name', header: 'Impressora', render: (p) => p.printer_name ?? '—', className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400' },
+    { key: 'material_name', header: 'Material', render: (p) => p.material_name ?? '—', className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400' },
     { key: 'quantity', header: 'Qtd.' },
     { key: 'cost', header: 'Custo unitário', render: (p) => formatCurrency(p.pricing.cost_with_losses) },
-    { key: 'price', header: 'Preço sugerido', render: (p) => formatCurrency(p.pricing.suggested_price_per_unit), className: 'py-2 pr-4 font-semibold text-emerald-700' },
+    {
+        key: 'price',
+        header: 'Preço sugerido',
+        render: (p) => formatCurrency(p.pricing.suggested_price_per_unit),
+        className: 'py-2.5 pr-4 font-semibold text-emerald-600 dark:text-emerald-400',
+    },
     { key: 'profit', header: 'Lucro total', render: (p) => formatCurrency(p.pricing.total_profit) },
 ];
 
@@ -51,18 +61,18 @@ export default function Products({ products, printers, materials, totals }) {
     });
 
     return (
-        <AuthenticatedLayout header={<h2 className="text-xl font-semibold text-slate-800">Tabela de Produtos</h2>}>
+        <AuthenticatedLayout header={<PageHeading title="Tabela de Produtos" icon={Package} />}>
             <Head title="Produtos" />
 
-            <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                {flash?.success && <AlertSuccess message={flash.success} />}
+            <div className="space-y-6">
+                <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <StatCard label="Receita total estimada" value={formatCurrency(totals.total_revenue)} accent />
-                    <StatCard label="Lucro total estimado" value={formatCurrency(totals.total_profit)} accent />
+                    <StatCard label="Receita total estimada" value={totals.total_revenue} format={formatCurrency} accent />
+                    <StatCard label="Lucro total estimado" value={totals.total_profit} format={formatCurrency} accent delay={0.05} />
                 </div>
 
-                <Card title={editingId ? 'Editar produto' : 'Novo produto'}>
+                <Card title={editingId ? 'Editar produto' : 'Novo produto'} delay={0.05}>
                     <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <FormField label="Nome do produto" error={errors.name}>
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
@@ -94,29 +104,37 @@ export default function Products({ products, printers, materials, totals }) {
                         <FormField label="Custos fixos extras (R$)" error={errors.extra_fixed_costs}>
                             <Input type="number" step="0.01" value={data.extra_fixed_costs} onChange={(e) => setData('extra_fixed_costs', e.target.value)} />
                         </FormField>
-                        <div className="flex items-end gap-2 lg:col-span-4">
-                            <button type="submit" disabled={processing} className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+                        <div className="flex items-center gap-2 lg:col-span-4">
+                            <PrimaryButton type="submit" disabled={processing}>
                                 {editingId ? 'Salvar alterações' : 'Adicionar produto'}
-                            </button>
-                            {editingId && (
-                                <button type="button" onClick={cancelEdit} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                    Cancelar
-                                </button>
-                            )}
+                            </PrimaryButton>
+                            {editingId && <SecondaryButton onClick={cancelEdit}>Cancelar</SecondaryButton>}
                         </div>
                     </form>
                 </Card>
 
-                <Card title="Produtos cadastrados">
+                <Card title="Produtos cadastrados" delay={0.1}>
                     <DataTable
                         columns={columns}
                         rows={products}
                         emptyMessage="Nenhum produto cadastrado ainda."
                         actions={(p) => (
-                            <>
-                                <button onClick={() => startEdit(p)} className="mr-3 text-slate-600 hover:underline">Editar</button>
-                                <button onClick={() => destroy(p, `Remover o produto "${p.name}"?`)} className="text-red-600 hover:underline">Remover</button>
-                            </>
+                            <div className="flex items-center justify-end gap-1">
+                                <button
+                                    onClick={() => startEdit(p)}
+                                    title="Editar"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-accent-400"
+                                >
+                                    <Pencil size={15} />
+                                </button>
+                                <button
+                                    onClick={() => destroy(p, `Remover o produto "${p.name}"?`)}
+                                    title="Remover"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                                >
+                                    <Trash2 size={15} />
+                                </button>
+                            </div>
                         )}
                     />
                 </Card>

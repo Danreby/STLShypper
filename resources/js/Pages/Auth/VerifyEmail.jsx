@@ -13,37 +13,31 @@ export default function VerifyEmail({ status }) {
 
     return (
         <GuestLayout>
-            <Head title="Email Verification" />
+            <Head title="Verificar e-mail" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                Thanks for signing up! Before getting started, could you verify
-                your email address by clicking on the link we just emailed to
-                you? If you didn't receive the email, we will gladly send you
-                another.
-            </div>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Confirme seu e-mail</h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Obrigado por se cadastrar! Antes de começar, confirme seu e-mail clicando no link que acabamos de enviar. Não recebeu?
+                Podemos enviar outro.
+            </p>
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+                    Um novo link de verificação foi enviado para o e-mail informado no cadastro.
                 </div>
             )}
 
-            <form onSubmit={submit}>
-                <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>
-                        Resend Verification Email
-                    </PrimaryButton>
+            <form onSubmit={submit} className="mt-6 flex items-center justify-between gap-4">
+                <PrimaryButton disabled={processing}>Reenviar e-mail</PrimaryButton>
 
-                    <Link
-                        href={route('logout')}
-                        method="post"
-                        as="button"
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                    >
-                        Log Out
-                    </Link>
-                </div>
+                <Link
+                    href={route('logout')}
+                    method="post"
+                    as="button"
+                    className="focus-ring rounded-md text-sm text-slate-500 underline underline-offset-2 hover:text-brand-600 dark:text-slate-400 dark:hover:text-accent-400"
+                >
+                    Sair
+                </Link>
             </form>
         </GuestLayout>
     );

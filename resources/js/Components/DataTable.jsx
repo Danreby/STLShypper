@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 /**
  * Tabela genérica usada pelas páginas de recursos (Materiais/Impressoras/Produtos).
  *
@@ -12,33 +14,46 @@ export default function DataTable({ columns, rows, actions, emptyMessage, rowKey
     const colSpan = columns.length + (actions ? 1 : 0);
 
     return (
-        <div className="overflow-x-auto">
+        <div className="-mx-5 overflow-x-auto px-5 sm:-mx-6 sm:px-6">
             <table className="w-full text-left text-sm">
                 <thead>
-                    <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                    <tr className="border-b border-slate-200/70 text-xs uppercase tracking-wide text-slate-500 dark:border-white/10 dark:text-slate-400">
                         {columns.map((column) => (
-                            <th key={column.key} className="py-2 pr-4">{column.header}</th>
+                            <th key={column.key} className="whitespace-nowrap py-2.5 pr-4 font-medium">
+                                {column.header}
+                            </th>
                         ))}
-                        {actions && <th className="py-2 pr-4" />}
+                        {actions && <th className="py-2.5 pr-4" />}
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map((row) => (
-                        <tr key={rowKey(row)} className="border-b border-slate-100">
-                            {columns.map((column, index) => (
+                    {rows.map((row, index) => (
+                        <motion.tr
+                            key={rowKey(row)}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.25, delay: Math.min(index * 0.035, 0.4) }}
+                            className="border-b border-slate-100 transition-colors hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5"
+                        >
+                            {columns.map((column, colIndex) => (
                                 <td
                                     key={column.key}
-                                    className={column.className ?? (index === 0 ? 'py-2 pr-4 font-medium text-slate-800' : 'py-2 pr-4')}
+                                    className={
+                                        column.className ??
+                                        (colIndex === 0
+                                            ? 'py-2.5 pr-4 font-medium text-slate-800 dark:text-slate-100'
+                                            : 'py-2.5 pr-4 text-slate-600 dark:text-slate-300')
+                                    }
                                 >
                                     {column.render ? column.render(row) : row[column.key]}
                                 </td>
                             ))}
-                            {actions && <td className="py-2 pr-4 text-right">{actions(row)}</td>}
-                        </tr>
+                            {actions && <td className="py-2.5 pr-4 text-right">{actions(row)}</td>}
+                        </motion.tr>
                     ))}
                     {rows.length === 0 && (
                         <tr>
-                            <td colSpan={colSpan} className="py-4 text-center text-slate-400">
+                            <td colSpan={colSpan} className="py-8 text-center text-slate-400 dark:text-slate-500">
                                 {emptyMessage}
                             </td>
                         </tr>

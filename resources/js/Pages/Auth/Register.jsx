@@ -25,7 +25,10 @@ export default function Register() {
         <GuestLayout>
             <Head title="Criar conta" />
 
-            <form onSubmit={submit}>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Crie sua conta</h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Comece a precificar suas impressões em minutos.</p>
+
+            <form onSubmit={submit} className="mt-6 space-y-4">
                 <div>
                     <InputLabel htmlFor="name" value="Nome" />
 
@@ -43,7 +46,7 @@ export default function Register() {
                     <InputError message={errors.name} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel htmlFor="email" value="E-mail" />
 
                     <TextInput
@@ -60,7 +63,7 @@ export default function Register() {
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel htmlFor="password" value="Senha" />
 
                     <TextInput
@@ -77,11 +80,8 @@ export default function Register() {
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirmar senha"
-                    />
+                <div>
+                    <InputLabel htmlFor="password_confirmation" value="Confirmar senha" />
 
                     <TextInput
                         id="password_confirmation"
@@ -90,30 +90,23 @@ export default function Register() {
                         value={data.password_confirmation}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
                         required
                     />
 
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                    <InputError message={errors.password_confirmation} className="mt-2" />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                    >
-                        Já tem uma conta?
+                <PrimaryButton className="w-full" disabled={processing}>
+                    Criar conta
+                </PrimaryButton>
+
+                <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+                    Já tem uma conta?{' '}
+                    <Link href={route('login')} className="focus-ring font-medium text-brand-600 underline underline-offset-2 dark:text-accent-400">
+                        Entrar
                     </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Criar conta
-                    </PrimaryButton>
-                </div>
+                </p>
             </form>
         </GuestLayout>
     );

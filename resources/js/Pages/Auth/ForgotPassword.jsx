@@ -17,38 +17,36 @@ export default function ForgotPassword({ status }) {
 
     return (
         <GuestLayout>
-            <Head title="Forgot Password" />
+            <Head title="Esqueci minha senha" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
-            </div>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Esqueceu sua senha?</h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Sem problemas. Informe seu e-mail e enviaremos um link para você escolher uma nova senha.
+            </p>
 
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600 dark:text-green-400">
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="mt-6 space-y-4">
                 <TextInput
                     id="email"
                     type="email"
                     name="email"
                     value={data.email}
-                    className="mt-1 block w-full"
+                    className="block w-full"
                     isFocused={true}
                     onChange={(e) => setData('email', e.target.value)}
+                    placeholder="voce@email.com"
                 />
 
-                <InputError message={errors.email} className="mt-2" />
+                <InputError message={errors.email} />
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full" disabled={processing}>
+                    Enviar link de redefinição
+                </PrimaryButton>
             </form>
         </GuestLayout>
     );

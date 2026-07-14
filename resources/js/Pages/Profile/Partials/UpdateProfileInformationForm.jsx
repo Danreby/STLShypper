@@ -2,7 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import { Transition } from '@headlessui/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useForm, usePage } from '@inertiajs/react';
 
 export default function UpdateProfileInformation({
@@ -27,18 +27,18 @@ export default function UpdateProfileInformation({
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Profile Information
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    Informações do perfil
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Update your account's profile information and email address.
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Atualize o nome e o e-mail da sua conta.
                 </p>
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <InputLabel htmlFor="name" value="Nome" />
 
                     <TextInput
                         id="name"
@@ -54,7 +54,7 @@ export default function UpdateProfileInformation({
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="E-mail" />
 
                     <TextInput
                         id="email"
@@ -71,41 +71,41 @@ export default function UpdateProfileInformation({
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
-                        <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
-                            Your email address is unverified.
+                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                            Seu e-mail ainda não foi verificado.{' '}
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                                className="focus-ring rounded-md text-sm text-slate-500 underline underline-offset-2 hover:text-brand-600 dark:text-slate-400 dark:hover:text-accent-400"
                             >
-                                Click here to re-send the verification email.
+                                Clique aqui para reenviar o e-mail de verificação.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                                A new verification link has been sent to your
-                                email address.
+                            <div className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                Um novo link de verificação foi enviado para o seu e-mail.
                             </div>
                         )}
                     </div>
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}>Salvar</PrimaryButton>
 
-                    <Transition
-                        show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        leave="transition ease-in-out"
-                        leaveTo="opacity-0"
-                    >
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Saved.
-                        </p>
-                    </Transition>
+                    <AnimatePresence>
+                        {recentlySuccessful && (
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="text-sm text-slate-500 dark:text-slate-400"
+                            >
+                                Salvo.
+                            </motion.p>
+                        )}
+                    </AnimatePresence>
                 </div>
             </form>
         </section>
