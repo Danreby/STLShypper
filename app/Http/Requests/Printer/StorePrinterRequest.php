@@ -22,6 +22,7 @@ class StorePrinterRequest extends FormRequest
             'useful_life_hours' => ['required', 'integer', 'min:1'],
             'power_w' => ['required', 'integer', 'min:1'],
             'annual_maintenance' => ['required', 'numeric', 'min:0'],
+            'purchase_url' => ['nullable', 'url', 'max:2048'],
         ];
     }
 }
