@@ -62,7 +62,7 @@ export default function Products({ products, printers, materials, totals }) {
     });
 
     return (
-        <AuthenticatedLayout header={<PageHeading title="Tabela de Produtos" icon={Package} />}>
+        <>
             <Head title="Produtos" />
 
             <div className="space-y-6">
@@ -145,6 +145,8 @@ export default function Products({ products, printers, materials, totals }) {
                     />
                 </Card>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Products.layout = (page) => <AuthenticatedLayout header={<PageHeading title="Tabela de Produtos" icon={Package} />}>{page}</AuthenticatedLayout>;

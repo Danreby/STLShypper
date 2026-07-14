@@ -40,7 +40,7 @@ export default function Settings({ settings }) {
     }
 
     return (
-        <AuthenticatedLayout header={<PageHeading title="Parâmetros Gerais" icon={SettingsIcon} />}>
+        <>
             <Head title="Parâmetros Gerais" />
 
             <div className="mx-auto max-w-3xl space-y-6">
@@ -85,6 +85,8 @@ export default function Settings({ settings }) {
                     </form>
                 </Card>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Settings.layout = (page) => <AuthenticatedLayout header={<PageHeading title="Parâmetros Gerais" icon={SettingsIcon} />}>{page}</AuthenticatedLayout>;

@@ -22,7 +22,7 @@ function Section({ delay, children }) {
 
 export default function Edit({ mustVerifyEmail, status }) {
     return (
-        <AuthenticatedLayout header={<PageHeading title="Meu perfil" icon={UserCircle} />}>
+        <>
             <Head title="Perfil" />
 
             <div className="mx-auto max-w-3xl space-y-6">
@@ -38,6 +38,8 @@ export default function Edit({ mustVerifyEmail, status }) {
                     <DeleteUserForm />
                 </Section>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Edit.layout = (page) => <AuthenticatedLayout header={<PageHeading title="Meu perfil" icon={UserCircle} />}>{page}</AuthenticatedLayout>;

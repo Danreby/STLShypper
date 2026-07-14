@@ -40,7 +40,7 @@ export default function Materials({ materials }) {
     });
 
     return (
-        <AuthenticatedLayout header={<PageHeading title="Materiais" icon={Layers} />}>
+        <>
             <Head title="Materiais" />
 
             <div className="space-y-6">
@@ -99,6 +99,8 @@ export default function Materials({ materials }) {
                     />
                 </Card>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Materials.layout = (page) => <AuthenticatedLayout header={<PageHeading title="Materiais" icon={Layers} />}>{page}</AuthenticatedLayout>;

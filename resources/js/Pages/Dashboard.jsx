@@ -20,7 +20,7 @@ import {
 
 export default function Dashboard({ stats, topProducts }) {
     return (
-        <AuthenticatedLayout header={<PageHeading title="Resumo" icon={LayoutDashboard} />}>
+        <>
             <Head title="Resumo" />
 
             <div className="space-y-6">
@@ -114,9 +114,11 @@ export default function Dashboard({ stats, topProducts }) {
                     />
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Dashboard.layout = (page) => <AuthenticatedLayout header={<PageHeading title="Resumo" icon={LayoutDashboard} />}>{page}</AuthenticatedLayout>;
 
 function QuickLink({ href, title, description, icon: Icon, delay = 0 }) {
     return (

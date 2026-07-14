@@ -54,7 +54,7 @@ export default function Printers({ printers }) {
     });
 
     return (
-        <AuthenticatedLayout header={<PageHeading title="Impressoras" icon={PrinterIcon} />}>
+        <>
             <Head title="Impressoras" />
 
             <div className="space-y-6">
@@ -112,6 +112,8 @@ export default function Printers({ printers }) {
                     />
                 </Card>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Printers.layout = (page) => <AuthenticatedLayout header={<PageHeading title="Impressoras" icon={PrinterIcon} />}>{page}</AuthenticatedLayout>;

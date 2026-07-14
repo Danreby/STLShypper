@@ -1,38 +1,48 @@
 import { Link } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 const DropDownContext = createContext();
 
 const Dropdown = ({ children }) => {
     const [open, setOpen] = useState(false);
+    const containerRef = useRef(null);
 
-    const toggleOpen = () => {
-        setOpen((previousState) => !previousState);
-    };
+    useEffect(() => {
+        if (!open) return undefined;
+
+        function handlePointerDown(event) {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setOpen(false);
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') setOpen(false);
+        }
+
+        document.addEventListener('pointerdown', handlePointerDown);
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open]);
 
     return (
-        <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
-            <div className="relative">{children}</div>
+        <DropDownContext.Provider value={{ open, setOpen }}>
+            <div ref={containerRef} className="relative">
+                {children}
+            </div>
         </DropDownContext.Provider>
     );
 };
 
 const Trigger = ({ children }) => {
-    const { open, setOpen, toggleOpen } = useContext(DropDownContext);
+    const { setOpen } = useContext(DropDownContext);
 
-    return (
-        <>
-            <div onClick={toggleOpen}>{children}</div>
-
-            {open && (
-                <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setOpen(false)}
-                ></div>
-            )}
-        </>
-    );
+    return <div onClick={() => setOpen((previousState) => !previousState)}>{children}</div>;
 };
 
 const Content = ({ align = 'right', width = '48', children }) => {

@@ -11,7 +11,11 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
             className="relative hidden shrink-0 border-r border-slate-200/70 bg-white/70 backdrop-blur-xl md:flex md:flex-col dark:border-white/10 dark:bg-slate-900/50"
         >
-            <div className="flex h-16 items-center gap-3 px-5">
+            <div
+                className={`flex items-center border-b border-slate-200/70 px-3 py-3 dark:border-white/10 ${
+                    collapsed ? 'flex-col gap-2' : 'h-16 flex-row justify-between gap-3 px-5 py-0'
+                }`}
+            >
                 <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
                     <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-500 via-violet-500 to-accent-400 shadow-lg shadow-brand-500/30">
                         <ApplicationLogo className="h-5 w-5 fill-current text-white" />
@@ -27,6 +31,22 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
                         </motion.span>
                     )}
                 </Link>
+
+                <button
+                    type="button"
+                    onClick={onToggleCollapse}
+                    title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+                    aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+                    className="focus-ring flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+                >
+                    <motion.span
+                        animate={{ rotate: collapsed ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex h-5 w-5 items-center justify-center"
+                    >
+                        <ChevronsLeft size={18} />
+                    </motion.span>
+                </button>
             </div>
 
             <nav className="mt-2 flex flex-1 flex-col gap-1 overflow-y-auto px-3 scrollbar-thin">
@@ -60,23 +80,6 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
                     );
                 })}
             </nav>
-
-            <div className="border-t border-slate-200/70 p-3 dark:border-white/10">
-                <button
-                    type="button"
-                    onClick={onToggleCollapse}
-                    className="focus-ring flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-                >
-                    <motion.span
-                        animate={{ rotate: collapsed ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex h-5 w-5 shrink-0 items-center justify-center"
-                    >
-                        <ChevronsLeft size={19} />
-                    </motion.span>
-                    {!collapsed && <span className="whitespace-nowrap">Recolher menu</span>}
-                </button>
-            </div>
         </motion.aside>
     );
 }

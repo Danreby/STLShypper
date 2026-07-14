@@ -62,7 +62,7 @@ export default function Calculator({ printers, materials, settings }) {
     }
 
     return (
-        <AuthenticatedLayout header={<PageHeading title="Calculadora de Custo — 1 Peça" icon={CalculatorIcon} />}>
+        <>
             <Head title="Calculadora" />
 
             <div className="space-y-6">
@@ -245,9 +245,13 @@ export default function Calculator({ printers, materials, settings }) {
                     </Card>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }
+
+Calculator.layout = (page) => (
+    <AuthenticatedLayout header={<PageHeading title="Calculadora de Custo — 1 Peça" icon={CalculatorIcon} />}>{page}</AuthenticatedLayout>
+);
 
 function Row({ label, value, strong }) {
     return (
