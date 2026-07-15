@@ -2,6 +2,7 @@ import Checkbox from '@/Components/Form/Checkbox';
 import GoogleAuthButton from '@/Components/Buttons/GoogleAuthButton';
 import InputError from '@/Components/Form/InputError';
 import InputLabel from '@/Components/Form/InputLabel';
+import PasswordInput from '@/Components/Form/PasswordInput';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import TextInput from '@/Components/Form/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
@@ -75,9 +76,8 @@ export default function Login({ status, canResetPassword }) {
                 <div>
                     <InputLabel htmlFor="password" value="Senha" />
 
-                    <TextInput
+                    <PasswordInput
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
                         className="mt-1 block w-full"

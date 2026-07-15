@@ -2,8 +2,8 @@ import DangerButton from '@/Components/Buttons/DangerButton';
 import InputError from '@/Components/Form/InputError';
 import InputLabel from '@/Components/Form/InputLabel';
 import Modal from '@/Components/Overlays/Modal';
+import PasswordInput from '@/Components/Form/PasswordInput';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import TextInput from '@/Components/Form/TextInput';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
@@ -74,9 +74,8 @@ export default function DeleteUserForm({ className = '' }) {
                     <div className="mt-6">
                         <InputLabel htmlFor="password" value="Senha" className="sr-only" />
 
-                        <TextInput
+                        <PasswordInput
                             id="password"
-                            type="password"
                             name="password"
                             ref={passwordInput}
                             value={data.password}

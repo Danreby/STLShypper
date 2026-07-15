@@ -1,6 +1,7 @@
 import GoogleAuthButton from '@/Components/Buttons/GoogleAuthButton';
 import InputError from '@/Components/Form/InputError';
 import InputLabel from '@/Components/Form/InputLabel';
+import PasswordInput from '@/Components/Form/PasswordInput';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import TextInput from '@/Components/Form/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
@@ -85,9 +86,8 @@ export default function Register() {
                 <div>
                     <InputLabel htmlFor="password" value="Senha" />
 
-                    <TextInput
+                    <PasswordInput
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
                         className="mt-1 block w-full"
@@ -102,9 +102,8 @@ export default function Register() {
                 <div>
                     <InputLabel htmlFor="password_confirmation" value="Confirmar senha" />
 
-                    <TextInput
+                    <PasswordInput
                         id="password_confirmation"
-                        type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
                         className="mt-1 block w-full"

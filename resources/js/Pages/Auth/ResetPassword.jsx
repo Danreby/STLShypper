@@ -1,5 +1,6 @@
 import InputError from '@/Components/Form/InputError';
 import InputLabel from '@/Components/Form/InputLabel';
+import PasswordInput from '@/Components/Form/PasswordInput';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import TextInput from '@/Components/Form/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
@@ -48,9 +49,8 @@ export default function ResetPassword({ token, email }) {
                 <div>
                     <InputLabel htmlFor="password" value="Nova senha" />
 
-                    <TextInput
+                    <PasswordInput
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
                         className="mt-1 block w-full"
@@ -65,8 +65,7 @@ export default function ResetPassword({ token, email }) {
                 <div>
                     <InputLabel htmlFor="password_confirmation" value="Confirmar senha" />
 
-                    <TextInput
-                        type="password"
+                    <PasswordInput
                         id="password_confirmation"
                         name="password_confirmation"
                         value={data.password_confirmation}

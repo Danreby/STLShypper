@@ -1,7 +1,7 @@
 import InputError from '@/Components/Form/InputError';
 import InputLabel from '@/Components/Form/InputLabel';
+import PasswordInput from '@/Components/Form/PasswordInput';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import TextInput from '@/Components/Form/TextInput';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
@@ -57,12 +57,11 @@ export default function UpdatePasswordForm({ className = '' }) {
                     <div>
                         <InputLabel htmlFor="current_password" value="Senha atual" />
 
-                        <TextInput
+                        <PasswordInput
                             id="current_password"
                             ref={currentPasswordInput}
                             value={data.current_password}
                             onChange={(e) => setData('current_password', e.target.value)}
-                            type="password"
                             className="mt-1 block w-full"
                             autoComplete="current-password"
                         />
@@ -74,12 +73,11 @@ export default function UpdatePasswordForm({ className = '' }) {
                 <div>
                     <InputLabel htmlFor="password" value={user.has_password ? 'Nova senha' : 'Senha'} />
 
-                    <TextInput
+                    <PasswordInput
                         id="password"
                         ref={passwordInput}
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
-                        type="password"
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                     />
@@ -90,11 +88,10 @@ export default function UpdatePasswordForm({ className = '' }) {
                 <div>
                     <InputLabel htmlFor="password_confirmation" value="Confirmar senha" />
 
-                    <TextInput
+                    <PasswordInput
                         id="password_confirmation"
                         value={data.password_confirmation}
                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                        type="password"
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                     />

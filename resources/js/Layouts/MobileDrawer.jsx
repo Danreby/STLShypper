@@ -26,8 +26,8 @@ export default function MobileDrawer({ open, onClose }) {
                     >
                         <div className="flex h-16 items-center justify-between px-5">
                             <div className="flex items-center gap-3">
-                                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-brand-500 via-violet-500 to-accent-400 shadow-lg shadow-brand-500/30">
-                                    <ApplicationLogo className="h-5 w-5 fill-current text-white" />
+                                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-lg shadow-brand-500/20">
+                                    <ApplicationLogo className="h-6 w-6" />
                                 </span>
                                 <span className="text-base font-semibold text-slate-900 dark:text-white">STLS Hypper</span>
                             </div>

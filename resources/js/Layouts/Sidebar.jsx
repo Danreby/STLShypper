@@ -18,8 +18,8 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
                 }`}
             >
                 <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
-                    <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-500 via-violet-500 to-accent-400 shadow-lg shadow-brand-500/30">
-                        <ApplicationLogo className="h-5 w-5 fill-current text-white" />
+                    <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-lg shadow-brand-500/20 dark:bg-white">
+                        <ApplicationLogo className="h-6 w-6" />
                     </span>
                     {!collapsed && (
                         <motion.span
