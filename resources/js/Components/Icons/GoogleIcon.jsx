@@ -1,6 +1,8 @@
-export default function GoogleIcon({ className = 'h-4 w-4' }) {
+export default function GoogleIcon({ className = 'h-4 w-4', size }) {
+    const style = size ? { width: size, height: size } : undefined;
+
     return (
-        <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+        <svg className={size ? undefined : className} style={style} viewBox="0 0 24 24" aria-hidden="true">
             <path
                 fill="#4285F4"
                 d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.42 3.58v2.98h3.92c2.3-2.12 3.52-5.23 3.52-8.8z"

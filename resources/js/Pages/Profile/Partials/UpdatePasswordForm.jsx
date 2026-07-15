@@ -3,22 +3,15 @@ import InputLabel from '@/Components/Form/InputLabel';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import TextInput from '@/Components/Form/TextInput';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
 
 export default function UpdatePasswordForm({ className = '' }) {
+    const user = usePage().props.auth.user;
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
 
-    const {
-        data,
-        setData,
-        errors,
-        put,
-        reset,
-        processing,
-        recentlySuccessful,
-    } = useForm({
+    const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
         password: '',
         password_confirmation: '',
@@ -29,6 +22,7 @@ export default function UpdatePasswordForm({ className = '' }) {
 
         put(route('password.update'), {
             preserveScroll: true,
+            errorBag: 'updatePassword',
             onSuccess: () => reset(),
             onError: (errors) => {
                 if (errors.password) {
@@ -48,33 +42,37 @@ export default function UpdatePasswordForm({ className = '' }) {
         <section className={className}>
             <header>
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                    Alterar senha
+                    {user.has_password ? 'Alterar senha' : 'Definir senha'}
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Use uma senha longa e aleatória para manter sua conta segura.
+                    {user.has_password
+                        ? 'Use uma senha longa e aleatória para manter sua conta segura.'
+                        : 'Sua conta ainda usa apenas o Google para entrar. Defina uma senha para poder entrar também com e-mail e senha, e para poder desconectar o Google depois.'}
                 </p>
             </header>
 
             <form onSubmit={updatePassword} className="mt-6 space-y-6">
+                {user.has_password && (
+                    <div>
+                        <InputLabel htmlFor="current_password" value="Senha atual" />
+
+                        <TextInput
+                            id="current_password"
+                            ref={currentPasswordInput}
+                            value={data.current_password}
+                            onChange={(e) => setData('current_password', e.target.value)}
+                            type="password"
+                            className="mt-1 block w-full"
+                            autoComplete="current-password"
+                        />
+
+                        <InputError message={errors.current_password} className="mt-2" />
+                    </div>
+                )}
+
                 <div>
-                    <InputLabel htmlFor="current_password" value="Senha atual" />
-
-                    <TextInput
-                        id="current_password"
-                        ref={currentPasswordInput}
-                        value={data.current_password}
-                        onChange={(e) => setData('current_password', e.target.value)}
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                    />
-
-                    <InputError message={errors.current_password} className="mt-2" />
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="password" value="Nova senha" />
+                    <InputLabel htmlFor="password" value={user.has_password ? 'Nova senha' : 'Senha'} />
 
                     <TextInput
                         id="password"
