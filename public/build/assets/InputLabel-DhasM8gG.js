@@ -1,0 +1,1 @@
+import{n as e}from"./app-BwIZVFOE.js";var t=e();function n({value:e,className:n=``,children:r,...i}){return(0,t.jsx)(`label`,{...i,className:`mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300 ${n}`,children:e||r})}export{n as t};
