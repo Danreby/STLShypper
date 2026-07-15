@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\ResolveGoogleUser;
 use App\Http\Controllers\Controller;
-use App\Models\Setting;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
+use RuntimeException;
+use Throwable;
 
 class GoogleAuthController extends Controller
 {
@@ -23,40 +26,29 @@ class GoogleAuthController extends Controller
     /**
      * Handle the callback from Google after authentication.
      */
-    public function callback(): RedirectResponse
+    public function callback(Request $request, ResolveGoogleUser $resolveGoogleUser): RedirectResponse
     {
-        $googleUser = Socialite::driver('google')->user();
+        try {
+            $googleUser = Socialite::driver('google')->user();
 
-        $user = User::where('google_id', $googleUser->getId())->first();
+            $user = $resolveGoogleUser->handle($googleUser);
+        } catch (InvalidStateException) {
+            // Expired/replayed OAuth flow (e.g. the user reopened an old tab
+            // or double-submitted); safe to just ask them to try again.
+            return redirect()->route('login')
+                ->with('status', 'Sessão de login com Google expirada. Tente novamente.');
+        } catch (RuntimeException $e) {
+            return redirect()->route('login')->withErrors(['email' => $e->getMessage()]);
+        } catch (Throwable $e) {
+            Log::error('Falha ao autenticar via Google.', ['exception' => $e]);
 
-        if (! $user) {
-            $user = User::where('email', $googleUser->getEmail())->first();
-        }
-
-        if ($user) {
-            if (! $user->google_id) {
-                $user->forceFill([
-                    'google_id' => $googleUser->getId(),
-                    'avatar' => $googleUser->getAvatar(),
-                    'email_verified_at' => $user->email_verified_at ?? now(),
-                ])->save();
-            }
-        } else {
-            $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'google_id' => $googleUser->getId(),
-                'avatar' => $googleUser->getAvatar(),
-                'password' => null,
-                'email_verified_at' => now(),
-            ]);
-
-            Setting::create(array_merge(['user_id' => $user->id], Setting::defaults()));
-
-            event(new Registered($user));
+            return redirect()->route('login')
+                ->with('status', 'Não foi possível entrar com o Google. Tente novamente.');
         }
 
         Auth::login($user, true);
+
+        $request->session()->regenerate();
 
         return redirect(route('dashboard', absolute: false));
     }

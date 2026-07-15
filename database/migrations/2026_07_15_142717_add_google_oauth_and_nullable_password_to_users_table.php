@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,9 +14,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('google_id')->nullable()->unique()->after('email');
             $table->string('avatar')->nullable()->after('google_id');
+            $table->string('password')->nullable()->change();
         });
-
-        DB::statement('ALTER TABLE users MODIFY password VARCHAR(255) NULL');
     }
 
     /**
@@ -27,8 +25,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn(['google_id', 'avatar']);
+            $table->string('password')->nullable(false)->change();
         });
-
-        DB::statement('ALTER TABLE users MODIFY password VARCHAR(255) NOT NULL');
     }
 };

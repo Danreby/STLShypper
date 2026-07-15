@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\CreateUserAccount;
 use App\Http\Controllers\Controller;
-use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +29,7 @@ class RegisteredUserController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, CreateUserAccount $createUserAccount): RedirectResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -38,19 +37,15 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $user = $createUserAccount->handle([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Toda conta nova já nasce com os Parâmetros Gerais padrão da
-        // planilha (kWh, mão de obra, % de perdas, impostos, taxas, margem).
-        Setting::create(array_merge(['user_id' => $user->id], Setting::defaults()));
-
-        event(new Registered($user));
-
         Auth::login($user);
+
+        $request->session()->regenerate();
 
         return redirect(route('dashboard', absolute: false));
     }
