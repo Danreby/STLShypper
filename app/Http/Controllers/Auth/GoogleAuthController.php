@@ -21,14 +21,29 @@ class GoogleAuthController extends Controller
     {
         $request->session()->forget('google_intent');
 
-        return Socialite::driver('google')->redirect();
+        return $this->googleRedirect();
     }
 
     public function redirectForLinking(Request $request): RedirectResponse
     {
         $request->session()->put('google_intent', 'link');
 
-        return Socialite::driver('google')->redirect();
+        return $this->googleRedirect();
+    }
+
+    /**
+     * Ask Google to deliver the callback via an auto-submitting POST instead
+     * of a GET with a long query string. Some hosts' WAF (e.g. Imunify360 on
+     * shared cPanel hosting) blocks the default GET callback with a 406,
+     * because Google's echoed `scope` param contains full googleapis.com
+     * URLs and generic WAF rules scrutinize query strings far more
+     * aggressively than POST bodies.
+     */
+    private function googleRedirect(): RedirectResponse
+    {
+        return Socialite::driver('google')
+            ->with(['response_mode' => 'form_post'])
+            ->redirect();
     }
 
     public function callback(

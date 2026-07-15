@@ -41,7 +41,11 @@ Route::middleware('guest')->group(function () {
         ->name('auth.google.redirect');
 });
 
-Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])
+// GET is kept alongside POST as a fallback in case response_mode=form_post
+// ever needs to be reverted; Google delivers the callback via POST (see
+// GoogleAuthController::googleRedirect()) to dodge shared-hosting WAFs that
+// scrutinize GET query strings far more aggressively than POST bodies.
+Route::match(['get', 'post'], 'auth/google/callback', [GoogleAuthController::class, 'callback'])
     ->middleware('throttle:10,1')
     ->name('auth.google.callback');
 

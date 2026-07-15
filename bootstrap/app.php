@@ -16,6 +16,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
         ]);
+
+        // Google's response_mode=form_post callback submits a POST with no
+        // Laravel CSRF token (it's an auto-submitting form from Google's own
+        // server-rendered page). Socialite's own `state` parameter check
+        // (validated against the session) is the equivalent CSRF protection
+        // for this specific route.
+        $middleware->validateCsrfTokens(except: [
+            'auth/google/callback',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
