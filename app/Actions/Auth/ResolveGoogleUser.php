@@ -9,21 +9,15 @@ use RuntimeException;
 
 class ResolveGoogleUser
 {
-    public function __construct(private readonly CreateUserAccount $creator)
-    {
+    public function __construct(
+        private readonly CreateUserAccount $creator,
+        private readonly EnsureGoogleEmailIsVerified $emailVerifier,
+    ) {
     }
 
-    /**
-     * Find, link, or create the local user for a Google Socialite user.
-     *
-     * Runs inside a transaction so two simultaneous callbacks for the same
-     * brand-new email can't both slip past the lookup and create duplicate
-     * accounts (the unique index on google_id/email is the last line of
-     * defense, but this avoids racing the account-provisioning side effects).
-     */
     public function handle(SocialiteUser $googleUser): User
     {
-        if (! $this->emailIsVerifiedByGoogle($googleUser)) {
+        if (! $this->emailVerifier->handle($googleUser)) {
             throw new RuntimeException('O e-mail da conta Google não está verificado.');
         }
 
@@ -55,20 +49,5 @@ class ResolveGoogleUser
                 'email_verified_at' => now(),
             ]);
         });
-    }
-
-    /**
-     * Google's OpenID Connect payload carries its own "email_verified" claim.
-     *
-     * Trusting getEmail() alone would let an account under a misconfigured
-     * Google Workspace domain (unverified email) hijack a local account that
-     * happens to share that address, so this claim is checked before any
-     * lookup/link/create decision is made.
-     */
-    private function emailIsVerifiedByGoogle(SocialiteUser $googleUser): bool
-    {
-        $raw = $googleUser->getRaw();
-
-        return filter_var($raw['email_verified'] ?? false, FILTER_VALIDATE_BOOL);
     }
 }

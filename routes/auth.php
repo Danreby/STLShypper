@@ -39,11 +39,11 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/google/redirect', [GoogleAuthController::class, 'redirect'])
         ->middleware('throttle:10,1')
         ->name('auth.google.redirect');
-
-    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])
-        ->middleware('throttle:10,1')
-        ->name('auth.google.callback');
 });
+
+Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])
+    ->middleware('throttle:10,1')
+    ->name('auth.google.callback');
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

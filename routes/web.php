@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\GoogleConnectionController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PrinterController;
 use App\Http\Controllers\ProductController;
@@ -22,6 +24,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/profile/google/redirect', [GoogleAuthController::class, 'redirectForLinking'])
+        ->middleware('throttle:10,1')
+        ->name('profile.google.redirect');
+
+    Route::delete('/profile/google', [GoogleConnectionController::class, 'destroy'])
+        ->name('profile.google.destroy');
 
     // Parâmetros Gerais
     Route::get('/parametros', [SettingsController::class, 'edit'])->name('settings.edit');

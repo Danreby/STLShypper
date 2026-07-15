@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\LinkGoogleAccount;
 use App\Actions\Auth\ResolveGoogleUser;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -10,40 +11,63 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
 class GoogleAuthController extends Controller
 {
-    /**
-     * Redirect the user to Google's OAuth consent screen.
-     */
-    public function redirect(): RedirectResponse
+    public function redirect(Request $request): RedirectResponse
     {
+        $request->session()->forget('google_intent');
+
         return Socialite::driver('google')->redirect();
     }
 
-    /**
-     * Handle the callback from Google after authentication.
-     */
-    public function callback(Request $request, ResolveGoogleUser $resolveGoogleUser): RedirectResponse
+    public function redirectForLinking(Request $request): RedirectResponse
     {
+        $request->session()->put('google_intent', 'link');
+
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function callback(
+        Request $request,
+        ResolveGoogleUser $resolveGoogleUser,
+        LinkGoogleAccount $linkGoogleAccount,
+    ): RedirectResponse {
+        $intent = $request->session()->pull('google_intent', 'login');
+
         try {
             $googleUser = Socialite::driver('google')->user();
-
-            $user = $resolveGoogleUser->handle($googleUser);
         } catch (InvalidStateException) {
-            // Expired/replayed OAuth flow (e.g. the user reopened an old tab
-            // or double-submitted); safe to just ask them to try again.
-            return redirect()->route('login')
-                ->with('status', 'Sessão de login com Google expirada. Tente novamente.');
-        } catch (RuntimeException $e) {
-            return redirect()->route('login')->withErrors(['email' => $e->getMessage()]);
+            return redirect()->route($intent === 'link' ? 'profile.edit' : 'login')
+                ->with('status', 'Sessão do Google expirada. Tente novamente.');
         } catch (Throwable $e) {
             Log::error('Falha ao autenticar via Google.', ['exception' => $e]);
 
-            return redirect()->route('login')
-                ->with('status', 'Não foi possível entrar com o Google. Tente novamente.');
+            return redirect()->route($intent === 'link' ? 'profile.edit' : 'login')
+                ->with('status', 'Não foi possível se conectar com o Google. Tente novamente.');
+        }
+
+        if ($intent === 'link') {
+            if (! Auth::check()) {
+                return redirect()->route('login');
+            }
+
+            try {
+                $linkGoogleAccount->handle($request->user(), $googleUser);
+            } catch (ValidationException $e) {
+                return redirect()->route('profile.edit')->withErrors($e->errors());
+            }
+
+            return redirect()->route('profile.edit')->with('status', 'google-connected');
+        }
+
+        try {
+            $user = $resolveGoogleUser->handle($googleUser);
+        } catch (RuntimeException $e) {
+            return redirect()->route('login')->withErrors(['email' => $e->getMessage()]);
         }
 
         Auth::login($user, true);
