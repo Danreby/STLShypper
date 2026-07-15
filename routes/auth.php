@@ -36,18 +36,10 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
 
-    Route::get('auth/google/redirect', [GoogleAuthController::class, 'redirect'])
+    Route::post('auth/google/exchange', [GoogleAuthController::class, 'exchange'])
         ->middleware('throttle:10,1')
-        ->name('auth.google.redirect');
+        ->name('auth.google.exchange');
 });
-
-// GET is kept alongside POST as a fallback in case response_mode=form_post
-// ever needs to be reverted; Google delivers the callback via POST (see
-// GoogleAuthController::googleRedirect()) to dodge shared-hosting WAFs that
-// scrutinize GET query strings far more aggressively than POST bodies.
-Route::match(['get', 'post'], 'auth/google/callback', [GoogleAuthController::class, 'callback'])
-    ->middleware('throttle:10,1')
-    ->name('auth.google.callback');
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

@@ -1,10 +1,11 @@
-import GoogleIcon from '@/Components/Icons/GoogleIcon';
+import GoogleAuthButton from '@/Components/Buttons/GoogleAuthButton';
 import InputError from '@/Components/Form/InputError';
 import InputLabel from '@/Components/Form/InputLabel';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import TextInput from '@/Components/Form/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -13,6 +14,7 @@ export default function Register() {
         password: '',
         password_confirmation: '',
     });
+    const [googleError, setGoogleError] = useState(null);
 
     const submit = (e) => {
         e.preventDefault();
@@ -29,13 +31,15 @@ export default function Register() {
             <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Crie sua conta</h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Comece a precificar suas impressões em minutos.</p>
 
-            <a
-                href={route('auth.google.redirect')}
-                className="focus-ring mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-            >
-                <GoogleIcon />
-                Criar conta com Google
-            </a>
+            <GoogleAuthButton
+                label="Criar conta com Google"
+                endpoint="auth.google.exchange"
+                onSuccess={(data) => window.location.assign(data.redirect)}
+                onError={setGoogleError}
+                className="mt-6"
+            />
+
+            <InputError message={googleError} className="mt-2" />
 
             <div className="mt-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200 dark:bg-white/10" />

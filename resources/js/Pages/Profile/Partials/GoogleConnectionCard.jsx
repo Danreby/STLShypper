@@ -1,10 +1,11 @@
 import AlertError from '@/Components/Feedback/AlertError';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import DangerButton from '@/Components/Buttons/DangerButton';
+import GoogleAuthButton from '@/Components/Buttons/GoogleAuthButton';
 import GoogleIcon from '@/Components/Icons/GoogleIcon';
 import Modal from '@/Components/Overlays/Modal';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import { useForm, usePage } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 import { AlertTriangle, CheckCircle2, Unlink } from 'lucide-react';
 import { useState } from 'react';
 
@@ -12,6 +13,7 @@ export default function GoogleConnectionCard({ className = '', status }) {
     const user = usePage().props.auth.user;
     const errors = usePage().props.errors;
     const [confirming, setConfirming] = useState(false);
+    const [connectFeedback, setConnectFeedback] = useState(null);
 
     const { delete: destroy, processing } = useForm({});
 
@@ -22,6 +24,15 @@ export default function GoogleConnectionCard({ className = '', status }) {
             preserveScroll: true,
             onSuccess: () => setConfirming(false),
         });
+    };
+
+    const handleConnected = () => {
+        setConnectFeedback({ type: 'success', message: 'Conta Google conectada com sucesso.' });
+        router.reload({ only: ['auth'] });
+    };
+
+    const handleConnectError = (message) => {
+        setConnectFeedback({ type: 'error', message });
     };
 
     const connected = Boolean(user.google_id);
@@ -36,9 +47,10 @@ export default function GoogleConnectionCard({ className = '', status }) {
             </header>
 
             <div className="mt-6 space-y-4">
-                {status === 'google-connected' && <AlertSuccess message="Conta Google conectada com sucesso." />}
                 {status === 'google-disconnected' && <AlertSuccess message="Conta Google desconectada." />}
                 {errors?.google && <AlertError message={errors.google} />}
+                {connectFeedback?.type === 'success' && <AlertSuccess message={connectFeedback.message} />}
+                {connectFeedback?.type === 'error' && <AlertError message={connectFeedback.message} />}
 
                 <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
                     <div className="flex items-center gap-3">
@@ -62,13 +74,13 @@ export default function GoogleConnectionCard({ className = '', status }) {
                             Desconectar
                         </SecondaryButton>
                     ) : (
-                        <a
-                            href={route('profile.google.redirect')}
-                            className="focus-ring inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-                        >
-                            <GoogleIcon />
-                            Conectar com Google
-                        </a>
+                        <GoogleAuthButton
+                            label="Conectar com Google"
+                            endpoint="profile.google.store"
+                            onSuccess={handleConnected}
+                            onError={handleConnectError}
+                            className="shrink-0 sm:w-auto"
+                        />
                     )}
                 </div>
 

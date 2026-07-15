@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
@@ -25,9 +24,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/profile/google/redirect', [GoogleAuthController::class, 'redirectForLinking'])
+    Route::post('/profile/google', [GoogleConnectionController::class, 'store'])
         ->middleware('throttle:10,1')
-        ->name('profile.google.redirect');
+        ->name('profile.google.store');
 
     Route::delete('/profile/google', [GoogleConnectionController::class, 'destroy'])
         ->name('profile.google.destroy');
