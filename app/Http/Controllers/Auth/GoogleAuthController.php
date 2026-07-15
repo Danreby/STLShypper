@@ -32,18 +32,27 @@ class GoogleAuthController extends Controller
     }
 
     /**
-     * Ask Google to deliver the callback via an auto-submitting POST instead
-     * of a GET with a long query string. Some hosts' WAF (e.g. Imunify360 on
-     * shared cPanel hosting) blocks the default GET callback with a 406,
-     * because Google's echoed `scope` param contains full googleapis.com
-     * URLs and generic WAF rules scrutinize query strings far more
-     * aggressively than POST bodies.
+     * On hosts whose WAF (e.g. Imunify360 on shared cPanel hosting) blocks
+     * the default GET callback with a 406 — because Google's echoed `scope`
+     * param contains full googleapis.com URLs and generic WAF rules
+     * scrutinize query strings far more aggressively than POST bodies —
+     * GOOGLE_FORM_POST_CALLBACK=true asks Google to deliver the callback via
+     * an auto-submitting POST instead.
+     *
+     * This requires SESSION_SAME_SITE=none (with SESSION_SECURE_COOKIE=true),
+     * since that POST is a cross-site request and a "lax" cookie would never
+     * reach the callback, breaking Socialite's session-based state check. So
+     * it's opt-in per environment rather than always-on.
      */
     private function googleRedirect(): RedirectResponse
     {
-        return Socialite::driver('google')
-            ->with(['response_mode' => 'form_post'])
-            ->redirect();
+        $driver = Socialite::driver('google');
+
+        if (config('services.google.form_post_callback')) {
+            $driver->with(['response_mode' => 'form_post']);
+        }
+
+        return $driver->redirect();
     }
 
     public function callback(
