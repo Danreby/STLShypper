@@ -166,7 +166,7 @@ export default function Materials({ materials, types, filters, pagination }) {
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <FormField label="Nome" error={errors.name} icon={Tag} index={0}>
-                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
+                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} maxLength={255} autoFocus />
                         </FormField>
                         <FormField label="Tipo" error={errors.type} icon={Layers} index={1}>
                             <Select value={data.type} onChange={(e) => setData('type', e.target.value)}>
@@ -179,10 +179,24 @@ export default function Materials({ materials, types, filters, pagination }) {
                             <ColorSwatchPicker value={data.color} onChange={(hex) => setData('color', hex)} />
                         </FormField>
                         <FormField label="Preço por kg (R$)" error={errors.price_per_kg} icon={Coins} index={3}>
-                            <Input type="number" step="0.01" value={data.price_per_kg} onChange={(e) => setData('price_per_kg', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100000"
+                                value={data.price_per_kg}
+                                onChange={(e) => setData('price_per_kg', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Estoque (g)" error={errors.qtd} icon={Package} index={4}>
-                            <Input type="number" step="0.01" min="0" value={data.qtd} onChange={(e) => setData('qtd', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="1000000"
+                                value={data.qtd}
+                                onChange={(e) => setData('qtd', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Observações" error={errors.notes} icon={FileText} index={5} className="sm:col-span-2">
                             <AutoGrowTextarea value={data.notes} onChange={(e) => setData('notes', e.target.value)} maxLength={255} />
@@ -193,6 +207,7 @@ export default function Materials({ materials, types, filters, pagination }) {
                                 placeholder="https://..."
                                 value={data.purchase_url}
                                 onChange={(e) => setData('purchase_url', e.target.value)}
+                                maxLength={2048}
                             />
                         </FormField>
                     </div>

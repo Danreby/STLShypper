@@ -144,19 +144,45 @@ export default function Printers({ printers, filters, pagination }) {
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <FormField label="Nome" error={errors.name} icon={Tag} index={0} className="sm:col-span-2">
-                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
+                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} maxLength={255} autoFocus />
                         </FormField>
                         <FormField label="Preço de compra (R$)" error={errors.purchase_price} icon={Coins} index={1}>
-                            <Input type="number" step="0.01" value={data.purchase_price} onChange={(e) => setData('purchase_price', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="500000"
+                                value={data.purchase_price}
+                                onChange={(e) => setData('purchase_price', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Vida útil (horas)" error={errors.useful_life_hours} icon={Clock} index={2}>
-                            <Input type="number" value={data.useful_life_hours} onChange={(e) => setData('useful_life_hours', e.target.value)} />
+                            <Input
+                                type="number"
+                                min="1"
+                                max="100000"
+                                value={data.useful_life_hours}
+                                onChange={(e) => setData('useful_life_hours', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Potência (W)" error={errors.power_w} icon={Gauge} index={3}>
-                            <Input type="number" value={data.power_w} onChange={(e) => setData('power_w', e.target.value)} />
+                            <Input
+                                type="number"
+                                min="1"
+                                max="20000"
+                                value={data.power_w}
+                                onChange={(e) => setData('power_w', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance} icon={Wrench} index={4}>
-                            <Input type="number" step="0.01" value={data.annual_maintenance} onChange={(e) => setData('annual_maintenance', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100000"
+                                value={data.annual_maintenance}
+                                onChange={(e) => setData('annual_maintenance', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Link de compra (opcional)" error={errors.purchase_url} icon={Link2} index={5} className="sm:col-span-2">
                             <Input
@@ -164,6 +190,7 @@ export default function Printers({ printers, filters, pagination }) {
                                 placeholder="https://..."
                                 value={data.purchase_url}
                                 onChange={(e) => setData('purchase_url', e.target.value)}
+                                maxLength={2048}
                             />
                         </FormField>
                     </div>

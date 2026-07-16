@@ -199,7 +199,7 @@ export default function Products({ products, printers, materials, filters, pagin
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <FormField label="Nome do produto" error={errors.name} icon={Tag} index={0} className="sm:col-span-2 lg:col-span-4">
-                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
+                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} maxLength={255} autoFocus />
                         </FormField>
                         <FormField label="Impressora" error={errors.printer_id} icon={PrinterFieldIcon} index={1}>
                             <Autocomplete
@@ -220,7 +220,13 @@ export default function Products({ products, printers, materials, filters, pagin
                             </Autocomplete>
                         </FormField>
                         <FormField label="Quantidade" error={errors.quantity} icon={Hash} index={3}>
-                            <Input type="number" min="1" value={data.quantity} onChange={(e) => setData('quantity', e.target.value)} />
+                            <Input
+                                type="number"
+                                min="1"
+                                max="100000"
+                                value={data.quantity}
+                                onChange={(e) => setData('quantity', e.target.value)}
+                            />
                         </FormField>
                         <FormField
                             label="Peso unitário (g)"
@@ -229,7 +235,14 @@ export default function Products({ products, printers, materials, filters, pagin
                             icon={Weight}
                             index={4}
                         >
-                            <Input type="number" step="0.01" value={data.piece_weight_g} onChange={(e) => setData('piece_weight_g', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                max="50000"
+                                value={data.piece_weight_g}
+                                onChange={(e) => setData('piece_weight_g', e.target.value)}
+                            />
                         </FormField>
                         <FormField
                             label="Tempo de impressão (h)"
@@ -238,13 +251,34 @@ export default function Products({ products, printers, materials, filters, pagin
                             icon={Clock}
                             index={5}
                         >
-                            <Input type="number" step="0.01" value={data.print_time_h} onChange={(e) => setData('print_time_h', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                max="1000"
+                                value={data.print_time_h}
+                                onChange={(e) => setData('print_time_h', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Mão de obra (R$)" error={errors.labor_cost} icon={Users} index={6}>
-                            <Input type="number" step="0.01" value={data.labor_cost} onChange={(e) => setData('labor_cost', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100000"
+                                value={data.labor_cost}
+                                onChange={(e) => setData('labor_cost', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Custos fixos extras (R$)" error={errors.extra_fixed_costs} icon={Receipt} index={7}>
-                            <Input type="number" step="0.01" value={data.extra_fixed_costs} onChange={(e) => setData('extra_fixed_costs', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100000"
+                                value={data.extra_fixed_costs}
+                                onChange={(e) => setData('extra_fixed_costs', e.target.value)}
+                            />
                         </FormField>
                     </div>
 

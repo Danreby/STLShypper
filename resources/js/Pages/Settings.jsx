@@ -53,28 +53,84 @@ export default function Settings({ settings }) {
                 <Card>
                     <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <FormField label="Valor do kWh (R$)" hint="Confira na sua conta de energia" error={errors.kwh_price}>
-                            <Input type="number" step="0.0001" value={data.kwh_price} onChange={(e) => setData('kwh_price', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.0001"
+                                min="0"
+                                max="50"
+                                value={data.kwh_price}
+                                onChange={(e) => setData('kwh_price', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Mão de obra (R$/h)" hint="Seu custo-hora para preparo e acabamento" error={errors.labor_rate}>
-                            <Input type="number" step="0.01" value={data.labor_rate} onChange={(e) => setData('labor_rate', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="1000"
+                                value={data.labor_rate}
+                                onChange={(e) => setData('labor_rate', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="% de perdas/falhas" hint="Peças perdidas por falha de impressão" error={errors.failure_pct}>
-                            <Input type="number" step="0.01" value={data.failure_pct} onChange={(e) => setData('failure_pct', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="99.99"
+                                value={data.failure_pct}
+                                onChange={(e) => setData('failure_pct', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="% material extra" hint="Purga, suportes e testes" error={errors.extra_material_pct}>
-                            <Input type="number" step="0.01" value={data.extra_material_pct} onChange={(e) => setData('extra_material_pct', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={data.extra_material_pct}
+                                onChange={(e) => setData('extra_material_pct', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Taxa de impostos (%)" hint="Ex.: MEI/Simples Nacional" error={errors.tax_pct}>
-                            <Input type="number" step="0.01" value={data.tax_pct} onChange={(e) => setData('tax_pct', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={data.tax_pct}
+                                onChange={(e) => setData('tax_pct', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Taxa de cartão/marketplace (%)" error={errors.fee_pct}>
-                            <Input type="number" step="0.01" value={data.fee_pct} onChange={(e) => setData('fee_pct', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={data.fee_pct}
+                                onChange={(e) => setData('fee_pct', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Margem de lucro padrão (%)" error={errors.margin_pct}>
-                            <Input type="number" step="0.01" value={data.margin_pct} onChange={(e) => setData('margin_pct', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={data.margin_pct}
+                                onChange={(e) => setData('margin_pct', e.target.value)}
+                            />
                         </FormField>
                         <FormField label="Horas de uso da impressora/ano" error={errors.hours_per_year}>
-                            <Input type="number" step="1" value={data.hours_per_year} onChange={(e) => setData('hours_per_year', e.target.value)} />
+                            <Input
+                                type="number"
+                                step="1"
+                                min="1"
+                                max="8760"
+                                value={data.hours_per_year}
+                                onChange={(e) => setData('hours_per_year', e.target.value)}
+                            />
                         </FormField>
 
                         <div className="sm:col-span-2">
