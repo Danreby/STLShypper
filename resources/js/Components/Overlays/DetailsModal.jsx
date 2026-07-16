@@ -27,7 +27,7 @@ export default function DetailsModal({ show, onClose, icon: Icon, title, subtitl
                 }`}
                 style={accentColor ? { backgroundColor: accentColor } : undefined}
             >
-                {accentColor && <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />}
+                {accentColor && <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />}
                 <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
 
                 <div className="relative flex items-center gap-3">

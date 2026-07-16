@@ -19,7 +19,23 @@ import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import {
+    AlertTriangle,
+    Clock,
+    Coins,
+    Hash,
+    Layers,
+    Package,
+    Pencil,
+    Plus,
+    Printer as PrinterFieldIcon,
+    Receipt,
+    Tag,
+    Trash2,
+    TrendingUp,
+    Users,
+    Weight,
+} from 'lucide-react';
 import { useState } from 'react';
 
 const emptyForm = {
@@ -182,10 +198,10 @@ export default function Products({ products, printers, materials, filters, pagin
                     </p>
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <FormField label="Nome do produto" error={errors.name} className="sm:col-span-2 lg:col-span-4">
+                        <FormField label="Nome do produto" error={errors.name} icon={Tag} index={0} className="sm:col-span-2 lg:col-span-4">
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
                         </FormField>
-                        <FormField label="Impressora" error={errors.printer_id}>
+                        <FormField label="Impressora" error={errors.printer_id} icon={PrinterFieldIcon} index={1}>
                             <Autocomplete
                                 value={data.printer_id}
                                 onChange={(e) => setData('printer_id', e.target.value)}
@@ -194,7 +210,7 @@ export default function Products({ products, printers, materials, filters, pagin
                                 {printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                             </Autocomplete>
                         </FormField>
-                        <FormField label="Material" error={errors.material_id}>
+                        <FormField label="Material" error={errors.material_id} icon={Layers} index={2}>
                             <Autocomplete
                                 value={data.material_id}
                                 onChange={(e) => setData('material_id', e.target.value)}
@@ -203,13 +219,15 @@ export default function Products({ products, printers, materials, filters, pagin
                                 {materials.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                             </Autocomplete>
                         </FormField>
-                        <FormField label="Quantidade" error={errors.quantity}>
+                        <FormField label="Quantidade" error={errors.quantity} icon={Hash} index={3}>
                             <Input type="number" min="1" value={data.quantity} onChange={(e) => setData('quantity', e.target.value)} />
                         </FormField>
                         <FormField
                             label="Peso unitário (g)"
                             // hint="Peso de 1 peça — o custo de material já escala automaticamente pela quantidade."
                             error={errors.piece_weight_g}
+                            icon={Weight}
+                            index={4}
                         >
                             <Input type="number" step="0.01" value={data.piece_weight_g} onChange={(e) => setData('piece_weight_g', e.target.value)} />
                         </FormField>
@@ -217,13 +235,15 @@ export default function Products({ products, printers, materials, filters, pagin
                             label="Tempo de impressão (h)"
                             // hint="Tempo da mesa inteira, com todas as peças da quantidade abaixo. Dividimos automaticamente pela quantidade para o custo por peça."
                             error={errors.print_time_h}
+                            icon={Clock}
+                            index={5}
                         >
                             <Input type="number" step="0.01" value={data.print_time_h} onChange={(e) => setData('print_time_h', e.target.value)} />
                         </FormField>
-                        <FormField label="Mão de obra (R$)" error={errors.labor_cost}>
+                        <FormField label="Mão de obra (R$)" error={errors.labor_cost} icon={Users} index={6}>
                             <Input type="number" step="0.01" value={data.labor_cost} onChange={(e) => setData('labor_cost', e.target.value)} />
                         </FormField>
-                        <FormField label="Custos fixos extras (R$)" error={errors.extra_fixed_costs}>
+                        <FormField label="Custos fixos extras (R$)" error={errors.extra_fixed_costs} icon={Receipt} index={7}>
                             <Input type="number" step="0.01" value={data.extra_fixed_costs} onChange={(e) => setData('extra_fixed_costs', e.target.value)} />
                         </FormField>
                     </div>
@@ -243,23 +263,26 @@ export default function Products({ products, printers, materials, filters, pagin
                 show={!!viewingRow}
                 onClose={() => setViewingRow(null)}
                 maxWidth="xl"
+                icon={Package}
                 title={viewingRow?.name}
+                subtitle={viewingRow?.printer_name && viewingRow?.material_name ? `${viewingRow.printer_name} · ${viewingRow.material_name}` : undefined}
                 onEdit={() => {
                     startEdit(viewingRow);
                     setViewingRow(null);
                 }}
                 fields={
                     viewingRow && [
-                        { label: 'Impressora', value: viewingRow.printer_name },
-                        { label: 'Material', value: viewingRow.material_name },
-                        { label: 'Quantidade', value: viewingRow.quantity },
-                        { label: 'Peso unitário', value: `${viewingRow.piece_weight_g} g` },
-                        { label: 'Tempo de impressão', value: `${viewingRow.print_time_h} h` },
-                        { label: 'Mão de obra', value: formatCurrency(viewingRow.labor_cost) },
-                        { label: 'Custos fixos extras', value: formatCurrency(viewingRow.extra_fixed_costs) },
-                        { label: 'Custo unitário', value: formatCurrency(viewingRow.pricing.cost_with_losses) },
+                        { label: 'Impressora', value: viewingRow.printer_name, icon: PrinterFieldIcon },
+                        { label: 'Material', value: viewingRow.material_name, icon: Layers },
+                        { label: 'Quantidade', value: viewingRow.quantity, icon: Hash },
+                        { label: 'Peso unitário', value: `${viewingRow.piece_weight_g} g`, icon: Weight },
+                        { label: 'Tempo de impressão', value: `${viewingRow.print_time_h} h`, icon: Clock },
+                        { label: 'Mão de obra', value: formatCurrency(viewingRow.labor_cost), icon: Users },
+                        { label: 'Custos fixos extras', value: formatCurrency(viewingRow.extra_fixed_costs), icon: Receipt },
+                        { label: 'Custo unitário', value: formatCurrency(viewingRow.pricing.cost_with_losses), icon: Coins },
                         {
                             label: 'Preço sugerido',
+                            icon: Coins,
                             value: viewingRow.pricing.denominator_warning ? (
                                 <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
                                     <AlertTriangle size={14} /> Ajustar parâmetros
@@ -268,7 +291,7 @@ export default function Products({ products, printers, materials, filters, pagin
                                 formatCurrency(viewingRow.pricing.suggested_price_per_unit)
                             ),
                         },
-                        { label: 'Lucro total', value: formatCurrency(viewingRow.pricing.total_profit) },
+                        { label: 'Lucro total', value: formatCurrency(viewingRow.pricing.total_profit), icon: TrendingUp },
                     ]
                 }
             />

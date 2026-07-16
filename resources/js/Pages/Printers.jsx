@@ -16,7 +16,7 @@ import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { ExternalLink, Pencil, Plus, Printer as PrinterIcon, Trash2 } from 'lucide-react';
+import { Clock, Coins, ExternalLink, Gauge, Link2, Pencil, Plus, Printer as PrinterIcon, Tag, Trash2, Wrench } from 'lucide-react';
 import { useState } from 'react';
 
 const emptyForm = {
@@ -143,22 +143,22 @@ export default function Printers({ printers, filters, pagination }) {
                     </p>
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <FormField label="Nome" error={errors.name} className="sm:col-span-2">
+                        <FormField label="Nome" error={errors.name} icon={Tag} index={0} className="sm:col-span-2">
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
                         </FormField>
-                        <FormField label="Preço de compra (R$)" error={errors.purchase_price}>
+                        <FormField label="Preço de compra (R$)" error={errors.purchase_price} icon={Coins} index={1}>
                             <Input type="number" step="0.01" value={data.purchase_price} onChange={(e) => setData('purchase_price', e.target.value)} />
                         </FormField>
-                        <FormField label="Vida útil (horas)" error={errors.useful_life_hours}>
+                        <FormField label="Vida útil (horas)" error={errors.useful_life_hours} icon={Clock} index={2}>
                             <Input type="number" value={data.useful_life_hours} onChange={(e) => setData('useful_life_hours', e.target.value)} />
                         </FormField>
-                        <FormField label="Potência (W)" error={errors.power_w}>
+                        <FormField label="Potência (W)" error={errors.power_w} icon={Gauge} index={3}>
                             <Input type="number" value={data.power_w} onChange={(e) => setData('power_w', e.target.value)} />
                         </FormField>
-                        <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance}>
+                        <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance} icon={Wrench} index={4}>
                             <Input type="number" step="0.01" value={data.annual_maintenance} onChange={(e) => setData('annual_maintenance', e.target.value)} />
                         </FormField>
-                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2">
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} icon={Link2} index={5} className="sm:col-span-2">
                             <Input
                                 type="url"
                                 placeholder="https://..."
@@ -182,6 +182,7 @@ export default function Printers({ printers, filters, pagination }) {
             <DetailsModal
                 show={!!viewingRow}
                 onClose={() => setViewingRow(null)}
+                icon={PrinterIcon}
                 title={viewingRow?.name}
                 onEdit={() => {
                     startEdit(viewingRow);
@@ -189,15 +190,21 @@ export default function Printers({ printers, filters, pagination }) {
                 }}
                 fields={
                     viewingRow && [
-                        { label: 'Preço de compra', value: formatCurrency(viewingRow.purchase_price) },
-                        { label: 'Vida útil', value: `${viewingRow.useful_life_hours} h` },
-                        { label: 'Potência', value: `${viewingRow.power_w} W` },
-                        { label: 'Manutenção anual', value: formatCurrency(viewingRow.annual_maintenance) },
-                        { label: 'Depreciação/h', value: formatCurrency(viewingRow.depreciation_per_hour) },
-                        { label: 'Manutenção/h', value: formatCurrency(viewingRow.maintenance_per_hour) },
-                        { label: 'Custo máquina/h', value: formatCurrency(viewingRow.total_cost_per_hour) },
+                        { label: 'Preço de compra', value: formatCurrency(viewingRow.purchase_price), icon: Coins },
+                        { label: 'Vida útil', value: `${viewingRow.useful_life_hours} h`, icon: Clock },
+                        { label: 'Potência', value: `${viewingRow.power_w} W`, icon: Gauge },
+                        { label: 'Manutenção anual', value: formatCurrency(viewingRow.annual_maintenance), icon: Wrench },
+                        { label: 'Depreciação/h', value: formatCurrency(viewingRow.depreciation_per_hour), icon: Coins },
+                        { label: 'Manutenção/h', value: formatCurrency(viewingRow.maintenance_per_hour), icon: Wrench },
+                        {
+                            label: 'Custo máquina/h',
+                            value: formatCurrency(viewingRow.total_cost_per_hour),
+                            icon: Coins,
+                            className: 'sm:col-span-2',
+                        },
                         {
                             label: 'Link de compra',
+                            icon: Link2,
                             value: viewingRow.purchase_url && (
                                 <a
                                     href={viewingRow.purchase_url}

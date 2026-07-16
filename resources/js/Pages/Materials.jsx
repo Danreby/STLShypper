@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/DataDisplay/Card';
+import ColorSwatchPicker from '@/Components/Form/ColorSwatchPicker';
 import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
@@ -17,10 +18,10 @@ import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { ExternalLink, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Coins, ExternalLink, FileText, Layers, Link2, Package, Palette, Pencil, Plus, Tag, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', qtd: 0, notes: '', purchase_url: '' };
+const emptyForm = { name: '', type: 'Filamento', color: '', price_per_kg: '', qtd: 0, notes: '', purchase_url: '' };
 
 function StockBadge({ qtd }) {
     const value = Number(qtd);
@@ -34,8 +35,18 @@ function StockBadge({ qtd }) {
     return <span>{value.toLocaleString('pt-BR')} g</span>;
 }
 
+function ColorDot({ color }) {
+    if (!color) return <span className="text-slate-400 dark:text-slate-500">—</span>;
+    return (
+        <span className="inline-flex items-center gap-2">
+            <span className="h-4 w-4 rounded-full ring-1 ring-inset ring-black/10 dark:ring-white/15" style={{ backgroundColor: color }} />
+        </span>
+    );
+}
+
 const columns = [
     { key: 'name', header: 'Nome', sortable: true },
+    { key: 'color', header: 'Cor', render: (m) => <ColorDot color={m.color} /> },
     { key: 'type', header: 'Tipo', sortable: true },
     { key: 'price_per_kg', header: 'Preço/kg', sortable: true, render: (m) => formatCurrency(m.price_per_kg) },
     { key: 'price_per_gram', header: 'Preço/g', sortable: true, render: (m) => formatCurrency(m.price_per_gram) },
@@ -74,6 +85,7 @@ export default function Materials({ materials, types, filters, pagination }) {
         mapRowToForm: (material) => ({
             name: material.name,
             type: material.type,
+            color: material.color ?? '',
             price_per_kg: material.price_per_kg,
             qtd: material.qtd,
             notes: material.notes ?? '',
@@ -153,26 +165,29 @@ export default function Materials({ materials, types, filters, pagination }) {
                     </p>
 
                     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <FormField label="Nome" error={errors.name}>
+                        <FormField label="Nome" error={errors.name} icon={Tag} index={0}>
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} autoFocus />
                         </FormField>
-                        <FormField label="Tipo" error={errors.type}>
+                        <FormField label="Tipo" error={errors.type} icon={Layers} index={1}>
                             <Select value={data.type} onChange={(e) => setData('type', e.target.value)}>
                                 <option>Filamento</option>
                                 <option>Resina</option>
                                 <option>Outro</option>
                             </Select>
                         </FormField>
-                        <FormField label="Preço por kg (R$)" error={errors.price_per_kg}>
+                        <FormField label="Cor (opcional)" error={errors.color} icon={Palette} index={2} className="sm:col-span-2">
+                            <ColorSwatchPicker value={data.color} onChange={(hex) => setData('color', hex)} />
+                        </FormField>
+                        <FormField label="Preço por kg (R$)" error={errors.price_per_kg} icon={Coins} index={3}>
                             <Input type="number" step="0.01" value={data.price_per_kg} onChange={(e) => setData('price_per_kg', e.target.value)} />
                         </FormField>
-                        <FormField label="Estoque (g)" error={errors.qtd}>
+                        <FormField label="Estoque (g)" error={errors.qtd} icon={Package} index={4}>
                             <Input type="number" step="0.01" min="0" value={data.qtd} onChange={(e) => setData('qtd', e.target.value)} />
                         </FormField>
-                        <FormField label="Observações" error={errors.notes}>
+                        <FormField label="Observações" error={errors.notes} icon={FileText} index={5}>
                             <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
                         </FormField>
-                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} className="sm:col-span-2">
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} icon={Link2} index={6} className="sm:col-span-2">
                             <Input
                                 type="url"
                                 placeholder="https://..."
@@ -196,21 +211,24 @@ export default function Materials({ materials, types, filters, pagination }) {
             <DetailsModal
                 show={!!viewingRow}
                 onClose={() => setViewingRow(null)}
+                icon={Layers}
                 title={viewingRow?.name}
                 subtitle={viewingRow?.type}
+                accentColor={viewingRow?.color}
                 onEdit={() => {
                     startEdit(viewingRow);
                     setViewingRow(null);
                 }}
                 fields={
                     viewingRow && [
-                        { label: 'Preço por kg', value: formatCurrency(viewingRow.price_per_kg) },
-                        { label: 'Preço por grama', value: formatCurrency(viewingRow.price_per_gram) },
-                        { label: 'Estoque', value: <StockBadge qtd={viewingRow.qtd} /> },
-                        { label: 'Tipo', value: viewingRow.type },
-                        { label: 'Observações', value: viewingRow.notes, className: 'sm:col-span-2' },
+                        { label: 'Preço por kg', value: formatCurrency(viewingRow.price_per_kg), icon: Coins },
+                        { label: 'Preço por grama', value: formatCurrency(viewingRow.price_per_gram), icon: Coins },
+                        { label: 'Estoque', value: <StockBadge qtd={viewingRow.qtd} />, icon: Package },
+                        { label: 'Cor', value: <ColorDot color={viewingRow.color} />, icon: Palette },
+                        { label: 'Observações', value: viewingRow.notes, icon: FileText, className: 'sm:col-span-2' },
                         {
                             label: 'Link de compra',
+                            icon: Link2,
                             value: viewingRow.purchase_url && (
                                 <a
                                     href={viewingRow.purchase_url}
