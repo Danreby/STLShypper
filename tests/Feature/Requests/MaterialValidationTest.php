@@ -16,7 +16,7 @@ class MaterialValidationTest extends TestCase
 
         $this->actingAs($user)
             ->post('/materiais', [])
-            ->assertSessionHasErrors(['name', 'type', 'price_per_kg']);
+            ->assertSessionHasErrors(['name', 'type', 'price_per_kg', 'qtd']);
     }
 
     public function test_store_rejects_negative_price(): void
@@ -28,7 +28,22 @@ class MaterialValidationTest extends TestCase
                 'name' => 'PLA',
                 'type' => 'Filamento',
                 'price_per_kg' => -1,
+                'qtd' => 0,
             ])
             ->assertSessionHasErrors(['price_per_kg']);
+    }
+
+    public function test_store_rejects_negative_stock(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/materiais', [
+                'name' => 'PLA',
+                'type' => 'Filamento',
+                'price_per_kg' => 100,
+                'qtd' => -5,
+            ])
+            ->assertSessionHasErrors(['qtd']);
     }
 }

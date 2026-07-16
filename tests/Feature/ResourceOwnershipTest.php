@@ -39,6 +39,7 @@ class ResourceOwnershipTest extends TestCase
             'name' => 'PLA Branco',
             'type' => 'Filamento',
             'price_per_kg' => 89.9,
+            'qtd' => 1000,
         ])->assertRedirect();
 
         $this->assertDatabaseHas('materials', [
@@ -95,7 +96,7 @@ class ResourceOwnershipTest extends TestCase
         $material = Material::factory()->for($owner)->create();
 
         $this->actingAs($intruder)
-            ->patch("/materiais/{$material->id}", ['name' => 'Hijacked', 'type' => 'Filamento', 'price_per_kg' => 1])
+            ->patch("/materiais/{$material->id}", ['name' => 'Hijacked', 'type' => 'Filamento', 'price_per_kg' => 1, 'qtd' => 0])
             ->assertNotFound();
 
         $this->actingAs($intruder)
