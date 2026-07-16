@@ -6,7 +6,7 @@
     <style>
         @page { margin: 28px 36px; }
         * { box-sizing: border-box; }
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1e293b; font-size: 12px; }
+        body { font-family: 'DejaVu Sans', sans-serif; color: #1e293b; font-size: 12px; }
 
         .header { width: 100%; border-bottom: 2px solid #4338ca; padding-bottom: 12px; margin-bottom: 18px; }
         .header td { vertical-align: middle; }

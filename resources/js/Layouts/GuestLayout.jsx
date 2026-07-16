@@ -27,8 +27,8 @@ export default function GuestLayout({ children }) {
                 <div className="absolute -top-24 -right-24 h-72 w-72 animate-glow rounded-full bg-accent-400/30 blur-3xl" />
 
                 <Link href="/" className="relative z-10 flex items-center gap-3">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-lg">
-                        <ApplicationLogo className="h-7 w-7" />
+                    <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+                        <ApplicationLogo variant="badge" className="h-full w-full" />
                     </span>
                     <span className="text-lg font-semibold tracking-tight">STLS Hypper</span>
                 </Link>
@@ -68,8 +68,8 @@ export default function GuestLayout({ children }) {
             <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6 lg:w-1/2">
                 <div className="mb-8 lg:hidden">
                     <Link href="/" className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-lg shadow-brand-500/20">
-                            <ApplicationLogo className="h-7 w-7" />
+                        <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl shadow-lg shadow-brand-500/20">
+                            <ApplicationLogo variant="badge" className="h-full w-full" />
                         </span>
                         <span className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">STLS Hypper</span>
                     </Link>
