@@ -23,6 +23,7 @@ class MaterialController extends Controller
         'type' => 'type',
         'price_per_kg' => 'price_per_kg',
         'price_per_gram' => 'price_per_gram',
+        'qtd' => 'qtd',
     ];
 
     public function index(Request $request): Response

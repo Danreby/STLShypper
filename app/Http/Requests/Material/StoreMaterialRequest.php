@@ -17,6 +17,7 @@ class StoreMaterialRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', 'string', 'max:100'],
             'price_per_kg' => ['required', 'numeric', 'min:0'],
+            'qtd' => ['required', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string', 'max:255'],
             'purchase_url' => ['nullable', 'url', 'max:2048'],
         ];
