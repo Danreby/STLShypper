@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/DataDisplay/Card';
+import ProfitBarChart from '@/Components/DataDisplay/ProfitBarChart';
 import StatCard from '@/Components/DataDisplay/StatCard';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import ExportExcel from '@/Components/ExportExcel';
@@ -18,7 +19,7 @@ import {
     TrendingUp,
 } from 'lucide-react';
 
-export default function Dashboard({ stats, topProducts }) {
+export default function Dashboard({ stats, topProducts, profitByMaterial, profitByPrinter }) {
     return (
         <>
             <Head title="Resumo" />
@@ -59,6 +60,15 @@ export default function Dashboard({ stats, topProducts }) {
                     <StatCard label="Receita total estimada" value={stats.total_revenue} format={formatCurrency} accent delay={0.05} />
                     <StatCard label="Custo total estimado" value={stats.total_cost} format={formatCurrency} delay={0.1} />
                     <StatCard label="Lucro total estimado" value={stats.total_profit} format={formatCurrency} accent delay={0.15} />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <Card title="Lucro por material" subtitle="Lucro total estimado, somado por material" delay={0.1}>
+                        <ProfitBarChart data={profitByMaterial} color="#06b6d4" />
+                    </Card>
+                    <Card title="Lucro por impressora" subtitle="Lucro total estimado, somado por impressora" delay={0.15}>
+                        <ProfitBarChart data={profitByPrinter} color="#6366f1" />
+                    </Card>
                 </div>
 
                 <Card title="Produtos mais lucrativos" subtitle="Top produtos ordenados por lucro total estimado" delay={0.1}>

@@ -24,6 +24,8 @@ class DashboardController extends Controller
 
         $priced = $products->map(fn ($product) => [
             'name' => $product->name,
+            'printer_name' => $product->printer?->name,
+            'material_name' => $product->material?->name,
             'pricing' => PricingCalculator::calculateForProduct($product, $settings),
         ]);
 
@@ -47,7 +49,35 @@ class DashboardController extends Controller
                 ->sortByDesc(fn ($p) => $p['pricing']['total_profit'])
                 ->take(5)
                 ->values(),
+            'profitByMaterial' => $this->groupProfit($priced, 'material_name'),
+            'profitByPrinter' => $this->groupProfit($priced, 'printer_name'),
             'settings' => new SettingResource($settings),
         ]);
+    }
+
+    /**
+     * Agrupa o lucro total por material/impressora, ordenado do maior para o menor.
+     * Além de um certo número de grupos, o restante é somado em "Outros" para manter o gráfico legível.
+     */
+    private function groupProfit($priced, string $groupKey, int $limit = 7): array
+    {
+        $grouped = $priced
+            ->filter(fn ($p) => $p[$groupKey])
+            ->groupBy($groupKey)
+            ->map(fn ($group, $label) => [
+                'label' => $label,
+                'profit' => round($group->sum(fn ($p) => $p['pricing']['total_profit']), 2),
+            ])
+            ->sortByDesc('profit')
+            ->values();
+
+        if ($grouped->count() <= $limit) {
+            return $grouped->all();
+        }
+
+        $top = $grouped->take($limit);
+        $otherProfit = round($grouped->slice($limit)->sum('profit'), 2);
+
+        return $top->push(['label' => 'Outros', 'profit' => $otherProfit])->all();
     }
 }

@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/produtos', [ProductController::class, 'store'])->name('products.store');
     Route::patch('/produtos/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/produtos/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/produtos/{product}/pdf', [ProductController::class, 'pdf'])->name('products.pdf');
 
     // Calculadora
     Route::get('/calculadora', [CalculatorController::class, 'index'])->name('calculator.index');

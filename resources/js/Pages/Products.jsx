@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/DataDisplay/Card';
 import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
+import AlertWarning from '@/Components/Feedback/AlertWarning';
 import StatCard from '@/Components/DataDisplay/StatCard';
 import Autocomplete from '@/Components/Form/Autocomplete';
 import Input from '@/Components/Form/Input';
@@ -24,6 +25,7 @@ import {
     AlertTriangle,
     Clock,
     Coins,
+    FileDown,
     Hash,
     Layers,
     Package,
@@ -114,6 +116,7 @@ export default function Products({ products, printers, materials, filters, pagin
 
             <div className="space-y-6">
                 <AnimatePresence>{flash?.success && <AlertSuccess message={flash.success} />}</AnimatePresence>
+                <AnimatePresence>{flash?.warning && <AlertWarning message={flash.warning} />}</AnimatePresence>
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">
                     <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
@@ -166,6 +169,14 @@ export default function Products({ products, printers, materials, filters, pagin
                         onRowClick={details.view}
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
+                                <a
+                                    href={`/produtos/${p.id}/pdf`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    title="Exportar orçamento em PDF"
+                                    className="focus-ring rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-accent-400"
+                                >
+                                    <FileDown size={15} />
+                                </a>
                                 <button
                                     onClick={() => startEdit(p)}
                                     title="Editar"
@@ -301,6 +312,16 @@ export default function Products({ products, printers, materials, filters, pagin
                 title={details.row?.name}
                 subtitle={details.row?.printer_name && details.row?.material_name ? `${details.row.printer_name} · ${details.row.material_name}` : undefined}
                 onEdit={() => startEdit(details.row)}
+                extraActions={
+                    details.row && (
+                        <a
+                            href={`/produtos/${details.row.id}/pdf`}
+                            className="focus-ring inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                        >
+                            <FileDown size={15} /> Exportar PDF
+                        </a>
+                    )
+                }
                 fields={
                     details.row && [
                         { label: 'Impressora', value: details.row.printer_name, icon: PrinterFieldIcon },

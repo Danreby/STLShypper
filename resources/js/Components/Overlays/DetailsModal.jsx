@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Pencil } from 'lucide-react';
 import { useRef } from 'react';
 
-export default function DetailsModal({ show, onClose, icon: Icon, title, subtitle, accentColor, fields, onEdit, maxWidth = 'lg' }) {
+export default function DetailsModal({ show, onClose, icon: Icon, title, subtitle, accentColor, fields, onEdit, extraActions, maxWidth = 'lg' }) {
     const pendingEdit = useRef(false);
 
     function handleEditClick() {
@@ -69,6 +69,7 @@ export default function DetailsModal({ show, onClose, icon: Icon, title, subtitl
                     <SecondaryButton type="button" onClick={onClose}>
                         Fechar
                     </SecondaryButton>
+                    {extraActions}
                     {onEdit && (
                         <PrimaryButton type="button" onClick={handleEditClick}>
                             <Pencil size={15} /> Editar

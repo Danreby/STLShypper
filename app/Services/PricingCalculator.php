@@ -75,6 +75,18 @@ class PricingCalculator
         ];
     }
 
+    /**
+     * Peso total de material (kg) consumido por um pedido, já considerando o % de material extra.
+     */
+    public static function materialConsumptionKg(array $input, Setting $settings): float
+    {
+        $pieceWeight = (float) ($input['piece_weight_g'] ?? 0);
+        $quantity = max(1, (int) ($input['quantity'] ?? 1));
+        $extraMaterialPct = self::resolve($input['extra_material_pct'] ?? null, $settings->extra_material_pct);
+
+        return $pieceWeight * (1 + $extraMaterialPct) * $quantity / 1000;
+    }
+
     public static function calculateForProduct(\App\Models\Product $product, Setting $settings): array
     {
         $printer = $product->printer;
