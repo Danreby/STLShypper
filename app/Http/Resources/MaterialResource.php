@@ -16,6 +16,7 @@ class MaterialResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'type' => $this->type,
+            'color' => $this->color,
             'price_per_kg' => (float) $this->price_per_kg,
             'price_per_gram' => round($this->pricePerGram(), 4),
             'qtd' => (float) $this->qtd,

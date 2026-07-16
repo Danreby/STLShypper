@@ -12,7 +12,7 @@ class Material extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name', 'type', 'price_per_kg', 'qtd', 'notes', 'purchase_url'];
+    protected $fillable = ['user_id', 'name', 'type', 'color', 'price_per_kg', 'qtd', 'notes', 'purchase_url'];
 
     protected function casts(): array
     {
