@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AutoGrowTextarea from '@/Components/Form/AutoGrowTextarea';
 import Card from '@/Components/DataDisplay/Card';
 import ColorSwatchPicker from '@/Components/Form/ColorSwatchPicker';
 import FormField from '@/Components/Form/FormField';
@@ -51,7 +52,6 @@ const columns = [
     { key: 'price_per_kg', header: 'Preço/kg', sortable: true, render: (m) => formatCurrency(m.price_per_kg) },
     { key: 'price_per_gram', header: 'Preço/g', sortable: true, render: (m) => formatCurrency(m.price_per_gram) },
     { key: 'qtd', header: 'Estoque', sortable: true, render: (m) => <StockBadge qtd={m.qtd} /> },
-    { key: 'notes', header: 'Observações', render: (m) => m.notes ?? '—' },
     {
         key: 'purchase_url',
         header: 'Link',
@@ -184,8 +184,8 @@ export default function Materials({ materials, types, filters, pagination }) {
                         <FormField label="Estoque (g)" error={errors.qtd} icon={Package} index={4}>
                             <Input type="number" step="0.01" min="0" value={data.qtd} onChange={(e) => setData('qtd', e.target.value)} />
                         </FormField>
-                        <FormField label="Observações" error={errors.notes} icon={FileText} index={5}>
-                            <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
+                        <FormField label="Observações" error={errors.notes} icon={FileText} index={5} className="sm:col-span-2">
+                            <AutoGrowTextarea value={data.notes} onChange={(e) => setData('notes', e.target.value)} maxLength={255} />
                         </FormField>
                         <FormField label="Link de compra (opcional)" error={errors.purchase_url} icon={Link2} index={6} className="sm:col-span-2">
                             <Input
