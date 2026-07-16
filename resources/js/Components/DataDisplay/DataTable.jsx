@@ -25,8 +25,9 @@ function SortIcon({ active, direction }) {
  * @param {string} [props.sort] - chave da coluna atualmente ordenada (ver `useSort`).
  * @param {'asc'|'desc'} [props.direction]
  * @param {(key: string) => void} [props.onSort] - chamado ao clicar num cabeçalho ordenável.
+ * @param {(row: object) => void} [props.onRowClick] - chamado ao clicar numa linha (ex.: abrir modal de detalhes); a coluna de ações não propaga o clique.
  */
-export default function DataTable({ columns, rows, actions, emptyMessage, rowKey = (row) => row.id, sort, direction, onSort }) {
+export default function DataTable({ columns, rows, actions, emptyMessage, rowKey = (row) => row.id, sort, direction, onSort, onRowClick }) {
     const colSpan = columns.length + (actions ? 1 : 0);
 
     return (
@@ -64,7 +65,8 @@ export default function DataTable({ columns, rows, actions, emptyMessage, rowKey
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.25, delay: Math.min(index * 0.035, 0.4) }}
-                            className="border-b border-slate-100 transition-colors hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5"
+                            onClick={onRowClick ? () => onRowClick(row) : undefined}
+                            className={`border-b border-slate-100 transition-colors hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5 ${onRowClick ? 'cursor-pointer' : ''}`}
                         >
                             {columns.map((column, colIndex) => (
                                 <td
@@ -79,7 +81,11 @@ export default function DataTable({ columns, rows, actions, emptyMessage, rowKey
                                     {column.render ? column.render(row) : row[column.key]}
                                 </td>
                             ))}
-                            {actions && <td className="py-2.5 pr-4 text-right">{actions(row)}</td>}
+                            {actions && (
+                                <td className="py-2.5 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                    {actions(row)}
+                                </td>
+                            )}
                         </motion.tr>
                     ))}
                     {rows.length === 0 && (
