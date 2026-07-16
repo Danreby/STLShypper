@@ -5,6 +5,7 @@ import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
 import Select from '@/Components/Form/Select';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import DetailsModal from '@/Components/Overlays/DetailsModal';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
 import Pagination from '@/Components/Pagination';
@@ -17,14 +18,28 @@ import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import { ExternalLink, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
-const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', notes: '', purchase_url: '' };
+const emptyForm = { name: '', type: 'Filamento', price_per_kg: '', qtd: 0, notes: '', purchase_url: '' };
+
+function StockBadge({ qtd }) {
+    const value = Number(qtd);
+    if (value <= 0) {
+        return (
+            <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-500/10 dark:text-red-400">
+                Esgotado
+            </span>
+        );
+    }
+    return <span>{value.toLocaleString('pt-BR')} g</span>;
+}
 
 const columns = [
     { key: 'name', header: 'Nome', sortable: true },
     { key: 'type', header: 'Tipo', sortable: true },
     { key: 'price_per_kg', header: 'Preço/kg', sortable: true, render: (m) => formatCurrency(m.price_per_kg) },
     { key: 'price_per_gram', header: 'Preço/g', sortable: true, render: (m) => formatCurrency(m.price_per_gram) },
+    { key: 'qtd', header: 'Estoque', sortable: true, render: (m) => <StockBadge qtd={m.qtd} /> },
     { key: 'notes', header: 'Observações', render: (m) => m.notes ?? '—' },
     {
         key: 'purchase_url',
@@ -36,6 +51,7 @@ const columns = [
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Abrir link de compra"
+                    onClick={(e) => e.stopPropagation()}
                     className="focus-ring inline-flex items-center gap-1 rounded-lg text-brand-600 hover:underline dark:text-accent-400"
                 >
                     <ExternalLink size={14} /> Comprar
@@ -49,6 +65,7 @@ const columns = [
 export default function Materials({ materials, types, filters, pagination }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('materials.index', filters);
+    const [viewingRow, setViewingRow] = useState(null);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/materiais',
@@ -58,6 +75,7 @@ export default function Materials({ materials, types, filters, pagination }) {
             name: material.name,
             type: material.type,
             price_per_kg: material.price_per_kg,
+            qtd: material.qtd,
             notes: material.notes ?? '',
             purchase_url: material.purchase_url ?? '',
         }),
@@ -100,6 +118,7 @@ export default function Materials({ materials, types, filters, pagination }) {
                         direction={direction}
                         onSort={onSort}
                         emptyMessage="Nenhum material encontrado."
+                        onRowClick={setViewingRow}
                         actions={(m) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button
@@ -147,6 +166,9 @@ export default function Materials({ materials, types, filters, pagination }) {
                         <FormField label="Preço por kg (R$)" error={errors.price_per_kg}>
                             <Input type="number" step="0.01" value={data.price_per_kg} onChange={(e) => setData('price_per_kg', e.target.value)} />
                         </FormField>
+                        <FormField label="Estoque (g)" error={errors.qtd}>
+                            <Input type="number" step="0.01" min="0" value={data.qtd} onChange={(e) => setData('qtd', e.target.value)} />
+                        </FormField>
                         <FormField label="Observações" error={errors.notes}>
                             <Input value={data.notes} onChange={(e) => setData('notes', e.target.value)} />
                         </FormField>
@@ -170,6 +192,40 @@ export default function Materials({ materials, types, filters, pagination }) {
                     </div>
                 </form>
             </Modal>
+
+            <DetailsModal
+                show={!!viewingRow}
+                onClose={() => setViewingRow(null)}
+                title={viewingRow?.name}
+                subtitle={viewingRow?.type}
+                onEdit={() => {
+                    startEdit(viewingRow);
+                    setViewingRow(null);
+                }}
+                fields={
+                    viewingRow && [
+                        { label: 'Preço por kg', value: formatCurrency(viewingRow.price_per_kg) },
+                        { label: 'Preço por grama', value: formatCurrency(viewingRow.price_per_gram) },
+                        { label: 'Estoque', value: <StockBadge qtd={viewingRow.qtd} /> },
+                        { label: 'Tipo', value: viewingRow.type },
+                        { label: 'Observações', value: viewingRow.notes, className: 'sm:col-span-2' },
+                        {
+                            label: 'Link de compra',
+                            value: viewingRow.purchase_url && (
+                                <a
+                                    href={viewingRow.purchase_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-brand-600 hover:underline dark:text-accent-400"
+                                >
+                                    <ExternalLink size={14} /> Abrir link
+                                </a>
+                            ),
+                            className: 'sm:col-span-2',
+                        },
+                    ]
+                }
+            />
         </>
     );
 }

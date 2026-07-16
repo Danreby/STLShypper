@@ -6,6 +6,7 @@ import StatCard from '@/Components/DataDisplay/StatCard';
 import Autocomplete from '@/Components/Form/Autocomplete';
 import Input from '@/Components/Form/Input';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import DetailsModal from '@/Components/Overlays/DetailsModal';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
 import Pagination from '@/Components/Pagination';
@@ -19,6 +20,7 @@ import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const emptyForm = {
     name: '',
@@ -72,6 +74,7 @@ const columns = [
 export default function Products({ products, printers, materials, filters, pagination, totals }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('products.index', filters);
+    const [viewingRow, setViewingRow] = useState(null);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/produtos',
@@ -144,6 +147,7 @@ export default function Products({ products, printers, materials, filters, pagin
                         direction={direction}
                         onSort={onSort}
                         emptyMessage="Nenhum produto encontrado."
+                        onRowClick={setViewingRow}
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button
@@ -234,6 +238,40 @@ export default function Products({ products, printers, materials, filters, pagin
                     </div>
                 </form>
             </Modal>
+
+            <DetailsModal
+                show={!!viewingRow}
+                onClose={() => setViewingRow(null)}
+                maxWidth="xl"
+                title={viewingRow?.name}
+                onEdit={() => {
+                    startEdit(viewingRow);
+                    setViewingRow(null);
+                }}
+                fields={
+                    viewingRow && [
+                        { label: 'Impressora', value: viewingRow.printer_name },
+                        { label: 'Material', value: viewingRow.material_name },
+                        { label: 'Quantidade', value: viewingRow.quantity },
+                        { label: 'Peso unitário', value: `${viewingRow.piece_weight_g} g` },
+                        { label: 'Tempo de impressão', value: `${viewingRow.print_time_h} h` },
+                        { label: 'Mão de obra', value: formatCurrency(viewingRow.labor_cost) },
+                        { label: 'Custos fixos extras', value: formatCurrency(viewingRow.extra_fixed_costs) },
+                        { label: 'Custo unitário', value: formatCurrency(viewingRow.pricing.cost_with_losses) },
+                        {
+                            label: 'Preço sugerido',
+                            value: viewingRow.pricing.denominator_warning ? (
+                                <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+                                    <AlertTriangle size={14} /> Ajustar parâmetros
+                                </span>
+                            ) : (
+                                formatCurrency(viewingRow.pricing.suggested_price_per_unit)
+                            ),
+                        },
+                        { label: 'Lucro total', value: formatCurrency(viewingRow.pricing.total_profit) },
+                    ]
+                }
+            />
         </>
     );
 }

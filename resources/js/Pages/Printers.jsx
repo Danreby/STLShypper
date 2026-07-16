@@ -4,6 +4,7 @@ import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
 import Input from '@/Components/Form/Input';
 import DataTable from '@/Components/DataDisplay/DataTable';
+import DetailsModal from '@/Components/Overlays/DetailsModal';
 import FilterBar from '@/Components/FilterBar';
 import Modal from '@/Components/Overlays/Modal';
 import Pagination from '@/Components/Pagination';
@@ -16,6 +17,7 @@ import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import { ExternalLink, Pencil, Plus, Printer as PrinterIcon, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const emptyForm = {
     name: '',
@@ -51,6 +53,7 @@ const columns = [
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Abrir link de compra"
+                    onClick={(e) => e.stopPropagation()}
                     className="focus-ring inline-flex items-center gap-1 rounded-lg text-brand-600 hover:underline dark:text-accent-400"
                 >
                     <ExternalLink size={14} /> Comprar
@@ -64,6 +67,7 @@ const columns = [
 export default function Printers({ printers, filters, pagination }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('printers.index', filters);
+    const [viewingRow, setViewingRow] = useState(null);
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/impressoras',
@@ -104,6 +108,7 @@ export default function Printers({ printers, filters, pagination }) {
                         direction={direction}
                         onSort={onSort}
                         emptyMessage="Nenhuma impressora encontrada."
+                        onRowClick={setViewingRow}
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button
@@ -173,6 +178,41 @@ export default function Printers({ printers, filters, pagination }) {
                     </div>
                 </form>
             </Modal>
+
+            <DetailsModal
+                show={!!viewingRow}
+                onClose={() => setViewingRow(null)}
+                title={viewingRow?.name}
+                onEdit={() => {
+                    startEdit(viewingRow);
+                    setViewingRow(null);
+                }}
+                fields={
+                    viewingRow && [
+                        { label: 'Preço de compra', value: formatCurrency(viewingRow.purchase_price) },
+                        { label: 'Vida útil', value: `${viewingRow.useful_life_hours} h` },
+                        { label: 'Potência', value: `${viewingRow.power_w} W` },
+                        { label: 'Manutenção anual', value: formatCurrency(viewingRow.annual_maintenance) },
+                        { label: 'Depreciação/h', value: formatCurrency(viewingRow.depreciation_per_hour) },
+                        { label: 'Manutenção/h', value: formatCurrency(viewingRow.maintenance_per_hour) },
+                        { label: 'Custo máquina/h', value: formatCurrency(viewingRow.total_cost_per_hour) },
+                        {
+                            label: 'Link de compra',
+                            value: viewingRow.purchase_url && (
+                                <a
+                                    href={viewingRow.purchase_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-brand-600 hover:underline dark:text-accent-400"
+                                >
+                                    <ExternalLink size={14} /> Abrir link
+                                </a>
+                            ),
+                            className: 'sm:col-span-2',
+                        },
+                    ]
+                }
+            />
         </>
     );
 }
