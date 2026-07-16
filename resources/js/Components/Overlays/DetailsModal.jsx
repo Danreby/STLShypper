@@ -3,6 +3,7 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import { motion } from 'framer-motion';
 import { Pencil } from 'lucide-react';
+import { useRef } from 'react';
 
 /**
  * Modal de "ver detalhes" genérico, aberto ao clicar numa linha do DataTable.
@@ -19,8 +20,26 @@ import { Pencil } from 'lucide-react';
  * @param {'sm'|'md'|'lg'|'xl'|'2xl'|'3xl'|'4xl'} [props.maxWidth]
  */
 export default function DetailsModal({ show, onClose, icon: Icon, title, subtitle, accentColor, fields, onEdit, maxWidth = 'lg' }) {
+    // "Editar" closes this modal first and only opens the edit one once this
+    // modal's own exit transition has fully finished — opening both at once
+    // leaves two HeadlessUI dialogs mounted simultaneously, which is what
+    // caused the edit modal's outside-click-to-close to misbehave.
+    const pendingEdit = useRef(false);
+
+    function handleEditClick() {
+        pendingEdit.current = true;
+        onClose();
+    }
+
+    function handleAfterLeave() {
+        if (pendingEdit.current) {
+            pendingEdit.current = false;
+            onEdit?.();
+        }
+    }
+
     return (
-        <Modal show={show} onClose={onClose} maxWidth={maxWidth}>
+        <Modal show={show} onClose={onClose} maxWidth={maxWidth} afterLeave={handleAfterLeave}>
             <div
                 className={`relative overflow-hidden rounded-t-3xl px-6 py-7 text-white sm:px-8 ${
                     accentColor ? '' : 'bg-linear-to-br from-brand-600 via-violet-500 to-accent-500'
@@ -69,7 +88,7 @@ export default function DetailsModal({ show, onClose, icon: Icon, title, subtitl
                         Fechar
                     </SecondaryButton>
                     {onEdit && (
-                        <PrimaryButton type="button" onClick={onEdit}>
+                        <PrimaryButton type="button" onClick={handleEditClick}>
                             <Pencil size={15} /> Editar
                         </PrimaryButton>
                     )}

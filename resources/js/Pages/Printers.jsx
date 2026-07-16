@@ -11,13 +11,13 @@ import Pagination from '@/Components/Pagination';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
+import useDetailsModal from '@/Hooks/useDetailsModal';
 import useResourceForm from '@/Hooks/useResourceForm';
 import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import { Clock, Coins, ExternalLink, Gauge, Link2, Pencil, Plus, Printer as PrinterIcon, Tag, Trash2, Wrench } from 'lucide-react';
-import { useState } from 'react';
 
 const emptyForm = {
     name: '',
@@ -67,7 +67,7 @@ const columns = [
 export default function Printers({ printers, filters, pagination }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('printers.index', filters);
-    const [viewingRow, setViewingRow] = useState(null);
+    const details = useDetailsModal();
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/impressoras',
@@ -108,7 +108,7 @@ export default function Printers({ printers, filters, pagination }) {
                         direction={direction}
                         onSort={onSort}
                         emptyMessage="Nenhuma impressora encontrada."
-                        onRowClick={setViewingRow}
+                        onRowClick={details.view}
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button
@@ -180,34 +180,31 @@ export default function Printers({ printers, filters, pagination }) {
             </Modal>
 
             <DetailsModal
-                show={!!viewingRow}
-                onClose={() => setViewingRow(null)}
+                show={details.show}
+                onClose={details.close}
                 icon={PrinterIcon}
-                title={viewingRow?.name}
-                onEdit={() => {
-                    startEdit(viewingRow);
-                    setViewingRow(null);
-                }}
+                title={details.row?.name}
+                onEdit={() => startEdit(details.row)}
                 fields={
-                    viewingRow && [
-                        { label: 'Preço de compra', value: formatCurrency(viewingRow.purchase_price), icon: Coins },
-                        { label: 'Vida útil', value: `${viewingRow.useful_life_hours} h`, icon: Clock },
-                        { label: 'Potência', value: `${viewingRow.power_w} W`, icon: Gauge },
-                        { label: 'Manutenção anual', value: formatCurrency(viewingRow.annual_maintenance), icon: Wrench },
-                        { label: 'Depreciação/h', value: formatCurrency(viewingRow.depreciation_per_hour), icon: Coins },
-                        { label: 'Manutenção/h', value: formatCurrency(viewingRow.maintenance_per_hour), icon: Wrench },
+                    details.row && [
+                        { label: 'Preço de compra', value: formatCurrency(details.row.purchase_price), icon: Coins },
+                        { label: 'Vida útil', value: `${details.row.useful_life_hours} h`, icon: Clock },
+                        { label: 'Potência', value: `${details.row.power_w} W`, icon: Gauge },
+                        { label: 'Manutenção anual', value: formatCurrency(details.row.annual_maintenance), icon: Wrench },
+                        { label: 'Depreciação/h', value: formatCurrency(details.row.depreciation_per_hour), icon: Coins },
+                        { label: 'Manutenção/h', value: formatCurrency(details.row.maintenance_per_hour), icon: Wrench },
                         {
                             label: 'Custo máquina/h',
-                            value: formatCurrency(viewingRow.total_cost_per_hour),
+                            value: formatCurrency(details.row.total_cost_per_hour),
                             icon: Coins,
                             className: 'sm:col-span-2',
                         },
                         {
                             label: 'Link de compra',
                             icon: Link2,
-                            value: viewingRow.purchase_url && (
+                            value: details.row.purchase_url && (
                                 <a
-                                    href={viewingRow.purchase_url}
+                                    href={details.row.purchase_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 text-brand-600 hover:underline dark:text-accent-400"

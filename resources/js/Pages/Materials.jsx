@@ -13,13 +13,13 @@ import Pagination from '@/Components/Pagination';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
+import useDetailsModal from '@/Hooks/useDetailsModal';
 import useResourceForm from '@/Hooks/useResourceForm';
 import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import { Coins, ExternalLink, FileText, Layers, Link2, Package, Palette, Pencil, Plus, Tag, Trash2 } from 'lucide-react';
-import { useState } from 'react';
 
 const emptyForm = { name: '', type: 'Filamento', color: '', price_per_kg: '', qtd: 0, notes: '', purchase_url: '' };
 
@@ -76,7 +76,7 @@ const columns = [
 export default function Materials({ materials, types, filters, pagination }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('materials.index', filters);
-    const [viewingRow, setViewingRow] = useState(null);
+    const details = useDetailsModal();
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/materiais',
@@ -130,7 +130,7 @@ export default function Materials({ materials, types, filters, pagination }) {
                         direction={direction}
                         onSort={onSort}
                         emptyMessage="Nenhum material encontrado."
-                        onRowClick={setViewingRow}
+                        onRowClick={details.view}
                         actions={(m) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button
@@ -209,29 +209,26 @@ export default function Materials({ materials, types, filters, pagination }) {
             </Modal>
 
             <DetailsModal
-                show={!!viewingRow}
-                onClose={() => setViewingRow(null)}
+                show={details.show}
+                onClose={details.close}
                 icon={Layers}
-                title={viewingRow?.name}
-                subtitle={viewingRow?.type}
-                accentColor={viewingRow?.color}
-                onEdit={() => {
-                    startEdit(viewingRow);
-                    setViewingRow(null);
-                }}
+                title={details.row?.name}
+                subtitle={details.row?.type}
+                accentColor={details.row?.color}
+                onEdit={() => startEdit(details.row)}
                 fields={
-                    viewingRow && [
-                        { label: 'Preço por kg', value: formatCurrency(viewingRow.price_per_kg), icon: Coins },
-                        { label: 'Preço por grama', value: formatCurrency(viewingRow.price_per_gram), icon: Coins },
-                        { label: 'Estoque', value: <StockBadge qtd={viewingRow.qtd} />, icon: Package },
-                        { label: 'Cor', value: <ColorDot color={viewingRow.color} />, icon: Palette },
-                        { label: 'Observações', value: viewingRow.notes, icon: FileText, className: 'sm:col-span-2' },
+                    details.row && [
+                        { label: 'Preço por kg', value: formatCurrency(details.row.price_per_kg), icon: Coins },
+                        { label: 'Preço por grama', value: formatCurrency(details.row.price_per_gram), icon: Coins },
+                        { label: 'Estoque', value: <StockBadge qtd={details.row.qtd} />, icon: Package },
+                        { label: 'Cor', value: <ColorDot color={details.row.color} />, icon: Palette },
+                        { label: 'Observações', value: details.row.notes, icon: FileText, className: 'sm:col-span-2' },
                         {
                             label: 'Link de compra',
                             icon: Link2,
-                            value: viewingRow.purchase_url && (
+                            value: details.row.purchase_url && (
                                 <a
-                                    href={viewingRow.purchase_url}
+                                    href={details.row.purchase_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 text-brand-600 hover:underline dark:text-accent-400"

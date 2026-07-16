@@ -14,6 +14,7 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import ExportExcel from '@/Components/ExportExcel';
+import useDetailsModal from '@/Hooks/useDetailsModal';
 import useResourceForm from '@/Hooks/useResourceForm';
 import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
@@ -36,7 +37,6 @@ import {
     Users,
     Weight,
 } from 'lucide-react';
-import { useState } from 'react';
 
 const emptyForm = {
     name: '',
@@ -90,7 +90,7 @@ const columns = [
 export default function Products({ products, printers, materials, filters, pagination, totals }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('products.index', filters);
-    const [viewingRow, setViewingRow] = useState(null);
+    const details = useDetailsModal();
     const { data, setData, errors, processing, editingId, showModal, openCreate, startEdit, closeModal, submit, destroy } = useResourceForm({
         emptyForm,
         storeUrl: '/produtos',
@@ -163,7 +163,7 @@ export default function Products({ products, printers, materials, filters, pagin
                         direction={direction}
                         onSort={onSort}
                         emptyMessage="Nenhum produto encontrado."
-                        onRowClick={setViewingRow}
+                        onRowClick={details.view}
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <button
@@ -260,38 +260,35 @@ export default function Products({ products, printers, materials, filters, pagin
             </Modal>
 
             <DetailsModal
-                show={!!viewingRow}
-                onClose={() => setViewingRow(null)}
+                show={details.show}
+                onClose={details.close}
                 maxWidth="xl"
                 icon={Package}
-                title={viewingRow?.name}
-                subtitle={viewingRow?.printer_name && viewingRow?.material_name ? `${viewingRow.printer_name} · ${viewingRow.material_name}` : undefined}
-                onEdit={() => {
-                    startEdit(viewingRow);
-                    setViewingRow(null);
-                }}
+                title={details.row?.name}
+                subtitle={details.row?.printer_name && details.row?.material_name ? `${details.row.printer_name} · ${details.row.material_name}` : undefined}
+                onEdit={() => startEdit(details.row)}
                 fields={
-                    viewingRow && [
-                        { label: 'Impressora', value: viewingRow.printer_name, icon: PrinterFieldIcon },
-                        { label: 'Material', value: viewingRow.material_name, icon: Layers },
-                        { label: 'Quantidade', value: viewingRow.quantity, icon: Hash },
-                        { label: 'Peso unitário', value: `${viewingRow.piece_weight_g} g`, icon: Weight },
-                        { label: 'Tempo de impressão', value: `${viewingRow.print_time_h} h`, icon: Clock },
-                        { label: 'Mão de obra', value: formatCurrency(viewingRow.labor_cost), icon: Users },
-                        { label: 'Custos fixos extras', value: formatCurrency(viewingRow.extra_fixed_costs), icon: Receipt },
-                        { label: 'Custo unitário', value: formatCurrency(viewingRow.pricing.cost_with_losses), icon: Coins },
+                    details.row && [
+                        { label: 'Impressora', value: details.row.printer_name, icon: PrinterFieldIcon },
+                        { label: 'Material', value: details.row.material_name, icon: Layers },
+                        { label: 'Quantidade', value: details.row.quantity, icon: Hash },
+                        { label: 'Peso unitário', value: `${details.row.piece_weight_g} g`, icon: Weight },
+                        { label: 'Tempo de impressão', value: `${details.row.print_time_h} h`, icon: Clock },
+                        { label: 'Mão de obra', value: formatCurrency(details.row.labor_cost), icon: Users },
+                        { label: 'Custos fixos extras', value: formatCurrency(details.row.extra_fixed_costs), icon: Receipt },
+                        { label: 'Custo unitário', value: formatCurrency(details.row.pricing.cost_with_losses), icon: Coins },
                         {
                             label: 'Preço sugerido',
                             icon: Coins,
-                            value: viewingRow.pricing.denominator_warning ? (
+                            value: details.row.pricing.denominator_warning ? (
                                 <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
                                     <AlertTriangle size={14} /> Ajustar parâmetros
                                 </span>
                             ) : (
-                                formatCurrency(viewingRow.pricing.suggested_price_per_unit)
+                                formatCurrency(details.row.pricing.suggested_price_per_unit)
                             ),
                         },
-                        { label: 'Lucro total', value: formatCurrency(viewingRow.pricing.total_profit), icon: TrendingUp },
+                        { label: 'Lucro total', value: formatCurrency(details.row.pricing.total_profit), icon: TrendingUp },
                     ]
                 }
             />
