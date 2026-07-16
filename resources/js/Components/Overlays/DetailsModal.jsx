@@ -23,7 +23,7 @@ export default function DetailsModal({ show, onClose, title, subtitle, fields, o
                 {subtitle && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
 
                 <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                    {fields.map(({ label, value, className = '' }, index) => (
+                    {(fields ?? []).map(({ label, value, className = '' }, index) => (
                         <div key={index} className={className}>
                             <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</dt>
                             <dd className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-100">
