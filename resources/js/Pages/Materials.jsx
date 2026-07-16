@@ -33,7 +33,7 @@ function StockBadge({ qtd }) {
             </span>
         );
     }
-    return <span>{value.toLocaleString('pt-BR')} g</span>;
+    return <span>{value.toLocaleString('pt-BR')} kg</span>;
 }
 
 function ColorDot({ color }) {
@@ -188,7 +188,7 @@ export default function Materials({ materials, types, filters, pagination }) {
                                 onChange={(e) => setData('price_per_kg', e.target.value)}
                             />
                         </FormField>
-                        <FormField label="Estoque (g)" error={errors.qtd} icon={Package} index={4}>
+                        <FormField label="Estoque (kg)" error={errors.qtd} icon={Package} index={4}>
                             <Input
                                 type="number"
                                 step="0.01"

@@ -6,12 +6,6 @@ const DIRECTION_CLASSES = {
     both: 'overflow-auto',
 };
 
-/**
- * Scrollable container with a thin, theme-aware, brand-tinted scrollbar
- * (see `.scrollbar-thin` in app.css) instead of the browser default.
- * Pass `fade` to mask the leading/trailing edge, hinting there's more
- * content to scroll.
- */
 const ScrollArea = forwardRef(function ScrollArea(
     { as: Component = 'div', direction = 'vertical', fade = false, className = '', children, ...props },
     ref,

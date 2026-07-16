@@ -12,9 +12,6 @@ class PrinterResource extends JsonResource
         parent::__construct($resource);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [

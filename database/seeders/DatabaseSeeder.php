@@ -12,11 +12,6 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Cria um usuário de demonstração com os mesmos dados de exemplo da
-     * planilha original (Parâmetros Gerais, Impressoras e Materiais),
-     * para que o sistema já nasça pronto para uso.
-     */
     public function run(): void
     {
         $this->call(UserSeeder::class);

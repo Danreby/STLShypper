@@ -18,8 +18,6 @@ export default function FilterBar({ routeName, filters, selects = [], searchPlac
     const isFirstRender = useRef(true);
 
     function apply(overrides = {}) {
-        // Spreading `filters` first carries forward anything this component doesn't
-        // manage itself — namely `sort`/`direction` set by the table's column headers.
         const params = { ...filters, search, ...selectValues, ...overrides };
         Object.keys(params).forEach((key) => {
             if (!params[key]) delete params[key];
@@ -51,7 +49,6 @@ export default function FilterBar({ routeName, filters, selects = [], searchPlac
         });
         setSelectValues(cleared);
 
-        // Clearing filters shouldn't reset the table's sort order — keep it.
         const params = { sort: filters.sort, direction: filters.direction };
         Object.keys(params).forEach((key) => {
             if (!params[key]) delete params[key];

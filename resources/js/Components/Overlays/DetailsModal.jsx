@@ -5,25 +5,7 @@ import { motion } from 'framer-motion';
 import { Pencil } from 'lucide-react';
 import { useRef } from 'react';
 
-/**
- * Modal de "ver detalhes" genérico, aberto ao clicar numa linha do DataTable.
- *
- * @param {object} props
- * @param {boolean} props.show
- * @param {() => void} props.onClose
- * @param {import('lucide-react').LucideIcon} [props.icon] - ícone exibido no badge do cabeçalho.
- * @param {string} props.title
- * @param {string} [props.subtitle]
- * @param {string} [props.accentColor] - hex opcional; tinge o cabeçalho com a cor do próprio registro (ex.: cor do material).
- * @param {{ label: string, value: any, icon?: import('lucide-react').LucideIcon, className?: string }[]} props.fields
- * @param {() => void} [props.onEdit] - se informado, mostra o botão "Editar".
- * @param {'sm'|'md'|'lg'|'xl'|'2xl'|'3xl'|'4xl'} [props.maxWidth]
- */
 export default function DetailsModal({ show, onClose, icon: Icon, title, subtitle, accentColor, fields, onEdit, maxWidth = 'lg' }) {
-    // "Editar" closes this modal first and only opens the edit one once this
-    // modal's own exit transition has fully finished — opening both at once
-    // leaves two HeadlessUI dialogs mounted simultaneously, which is what
-    // caused the edit modal's outside-click-to-close to misbehave.
     const pendingEdit = useRef(false);
 
     function handleEditClick() {

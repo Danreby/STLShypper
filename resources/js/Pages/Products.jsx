@@ -245,7 +245,7 @@ export default function Products({ products, printers, materials, filters, pagin
                             />
                         </FormField>
                         <FormField
-                            label="Tempo de impressão (h)"
+                            label="Tempo de impr. (h)"
                             // hint="Tempo da mesa inteira, com todas as peças da quantidade abaixo. Dividimos automaticamente pela quantidade para o custo por peça."
                             error={errors.print_time_h}
                             icon={Clock}
@@ -270,7 +270,7 @@ export default function Products({ products, printers, materials, filters, pagin
                                 onChange={(e) => setData('labor_cost', e.target.value)}
                             />
                         </FormField>
-                        <FormField label="Custos fixos extras (R$)" error={errors.extra_fixed_costs} icon={Receipt} index={7}>
+                        <FormField label="Custos extras (R$)" error={errors.extra_fixed_costs} icon={Receipt} index={7}>
                             <Input
                                 type="number"
                                 step="0.01"

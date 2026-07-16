@@ -8,9 +8,6 @@ use App\Services\PricingCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @property Product $resource
- */
 class ProductResource extends JsonResource
 {
     public function __construct(Product $resource, private readonly Setting $settings)
@@ -18,9 +15,6 @@ class ProductResource extends JsonResource
         parent::__construct($resource);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [

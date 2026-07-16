@@ -13,20 +13,6 @@ function SortIcon({ active, direction }) {
     );
 }
 
-/**
- * Tabela genérica usada pelas páginas de recursos (Materiais/Impressoras/Produtos).
- *
- * @param {object} props
- * @param {{ key: string, header: string, sortable?: boolean, render?: (row: object) => any, className?: string }[]} props.columns
- * @param {object[]} props.rows
- * @param {(row: object) => any} [props.actions] - render prop para a coluna de ações (editar/remover).
- * @param {string} props.emptyMessage
- * @param {(row: object) => number|string} [props.rowKey]
- * @param {string} [props.sort] - chave da coluna atualmente ordenada (ver `useSort`).
- * @param {'asc'|'desc'} [props.direction]
- * @param {(key: string) => void} [props.onSort] - chamado ao clicar num cabeçalho ordenável.
- * @param {(row: object) => void} [props.onRowClick] - chamado ao clicar numa linha (ex.: abrir modal de detalhes); a coluna de ações não propaga o clique.
- */
 export default function DataTable({ columns, rows, actions, emptyMessage, rowKey = (row) => row.id, sort, direction, onSort, onRowClick }) {
     const colSpan = columns.length + (actions ? 1 : 0);
 
