@@ -81,6 +81,49 @@ function FilamentTypeChips({ types }) {
     );
 }
 
+// Painel "hero" do modal de detalhes: mostra a tecnologia e a lista completa
+// (sem truncar) de tipos de material aceitos, cada um com sua própria cor.
+function TechnologyAndMaterialsPanel({ printer }) {
+    const types = printer.filament_types ?? [];
+    const isResin = printer.technology === 'resin';
+
+    return (
+        <div
+            className={`relative overflow-hidden rounded-2xl border p-4 ${
+                isResin
+                    ? 'border-violet-200/70 bg-linear-to-br from-violet-50 to-violet-100/40 dark:border-violet-500/20 dark:from-violet-500/10 dark:to-violet-500/5'
+                    : 'border-brand-200/70 bg-linear-to-br from-brand-50 to-accent-400/10 dark:border-white/10 dark:from-brand-500/10 dark:to-accent-400/5'
+            }`}
+        >
+            <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">Tecnologia</span>
+                <TechnologyBadge technology={printer.technology} label={printer.technology_label} />
+            </div>
+
+            <div className="mt-3.5 border-t border-black/5 pt-3.5 dark:border-white/10">
+                <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                    Materiais aceitos {types.length > 0 && `(${types.length})`}
+                </span>
+                {types.length === 0 ? (
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Nenhum tipo configurado. Edite a impressora para adicionar.</p>
+                ) : (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                        {types.map((type) => (
+                            <span
+                                key={type.id}
+                                className="inline-flex items-center gap-1.5 rounded-full border border-black/5 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-slate-100"
+                            >
+                                <span className="h-2 w-2 shrink-0 rounded-full ring-1 ring-inset ring-black/10 dark:ring-white/20" style={{ backgroundColor: type.color }} />
+                                {type.name}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 const columns = [
     { key: 'name', header: 'Nome', sortable: true },
     {
@@ -309,14 +352,9 @@ export default function Printers({ printers, filters, pagination, filamentTypes 
                 fields={
                     details.row && [
                         {
-                            label: 'Tecnologia',
-                            value: <TechnologyBadge technology={details.row.technology} label={details.row.technology_label} />,
-                            icon: details.row.technology === 'resin' ? Droplets : Layers,
-                        },
-                        {
-                            label: 'Materiais aceitos',
-                            value: <FilamentTypeChips types={details.row.filament_types} />,
-                            icon: Layers,
+                            raw: true,
+                            className: 'sm:col-span-2',
+                            value: <TechnologyAndMaterialsPanel printer={details.row} />,
                         },
                         { label: 'Preço de compra', value: formatCurrency(details.row.purchase_price), icon: Coins },
                         { label: 'Vida útil', value: `${details.row.useful_life_hours} h`, icon: Clock },

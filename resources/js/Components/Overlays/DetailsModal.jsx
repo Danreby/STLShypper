@@ -46,23 +46,35 @@ export default function DetailsModal({ show, onClose, icon: Icon, title, subtitl
 
             <div className="p-6 sm:p-8">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {(fields ?? []).map(({ label, value, icon: FieldIcon, className = '' }, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.35), ease: 'easeOut' }}
-                            className={`rounded-2xl border border-slate-200/70 bg-slate-50/60 p-3.5 transition-colors hover:border-brand-200 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 ${className}`}
-                        >
-                            <div className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                                {FieldIcon && <FieldIcon size={13} />}
-                                {label}
-                            </div>
-                            <div className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                {value === null || value === undefined || value === '' ? '—' : value}
-                            </div>
-                        </motion.div>
-                    ))}
+                    {(fields ?? []).map(({ label, value, icon: FieldIcon, className = '', raw = false }, index) =>
+                        raw ? (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.35), ease: 'easeOut' }}
+                                className={className}
+                            >
+                                {value}
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.35), ease: 'easeOut' }}
+                                className={`rounded-2xl border border-slate-200/70 bg-slate-50/60 p-3.5 transition-colors hover:border-brand-200 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 ${className}`}
+                            >
+                                <div className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                                    {FieldIcon && <FieldIcon size={13} />}
+                                    {label}
+                                </div>
+                                <div className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                    {value === null || value === undefined || value === '' ? '—' : value}
+                                </div>
+                            </motion.div>
+                        )
+                    )}
                 </div>
 
                 <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-5 dark:border-white/10">
