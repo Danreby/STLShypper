@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\FilamentType;
 use App\Models\Material;
 use App\Models\Printer;
 use App\Models\Product;
@@ -15,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(UserSeeder::class);
+        $this->call(FilamentTypeSeeder::class);
 
         $user = User::firstOrCreate(
             ['email' => 'demo@stlshypper.test'],
@@ -31,20 +33,27 @@ class DatabaseSeeder extends Seeder
         );
 
         $printers = [
-            ['name' => 'Ender 3 (aprox. 120W)', 'purchase_price' => 1200, 'useful_life_hours' => 8000, 'power_w' => 120, 'annual_maintenance' => 250],
-            ['name' => 'Elegoo Neptune 4 (aprox. 150W)', 'purchase_price' => 1800, 'useful_life_hours' => 8000, 'power_w' => 150, 'annual_maintenance' => 250],
-            ['name' => 'Bambu A1 Mini (aprox. 150W)', 'purchase_price' => 2300, 'useful_life_hours' => 12000, 'power_w' => 150, 'annual_maintenance' => 200],
-            ['name' => 'Bambu A1 (aprox. 200W)', 'purchase_price' => 3200, 'useful_life_hours' => 12000, 'power_w' => 200, 'annual_maintenance' => 250],
-            ['name' => 'Bambu X1 Carbon (aprox. 350W)', 'purchase_price' => 8500, 'useful_life_hours' => 15000, 'power_w' => 350, 'annual_maintenance' => 400],
-            ['name' => 'Impressora de Resina (aprox. 80W)', 'purchase_price' => 2500, 'useful_life_hours' => 8000, 'power_w' => 80, 'annual_maintenance' => 300],
+            ['name' => 'Ender 3 (aprox. 120W)', 'technology' => 'fdm', 'purchase_price' => 1200, 'useful_life_hours' => 8000, 'power_w' => 120, 'annual_maintenance' => 250, 'filament_types' => ['pla', 'petg', 'abs']],
+            ['name' => 'Elegoo Neptune 4 (aprox. 150W)', 'technology' => 'fdm', 'purchase_price' => 1800, 'useful_life_hours' => 8000, 'power_w' => 150, 'annual_maintenance' => 250, 'filament_types' => ['pla', 'petg', 'tpu']],
+            ['name' => 'Bambu A1 Mini (aprox. 150W)', 'technology' => 'fdm', 'purchase_price' => 2300, 'useful_life_hours' => 12000, 'power_w' => 150, 'annual_maintenance' => 200, 'filament_types' => ['pla', 'pla-plus', 'petg', 'tpu']],
+            ['name' => 'Bambu A1 (aprox. 200W)', 'technology' => 'fdm', 'purchase_price' => 3200, 'useful_life_hours' => 12000, 'power_w' => 200, 'annual_maintenance' => 250, 'filament_types' => ['pla', 'pla-plus', 'petg', 'abs', 'asa', 'tpu']],
+            ['name' => 'Bambu X1 Carbon (aprox. 350W)', 'technology' => 'fdm', 'purchase_price' => 8500, 'useful_life_hours' => 15000, 'power_w' => 350, 'annual_maintenance' => 400, 'filament_types' => ['pla', 'pla-plus', 'petg', 'abs', 'asa', 'nylon', 'pc', 'carbon-fiber']],
+            ['name' => 'Impressora de Resina (aprox. 80W)', 'technology' => 'resin', 'purchase_price' => 2500, 'useful_life_hours' => 8000, 'power_w' => 80, 'annual_maintenance' => 300, 'filament_types' => ['resin-standard', 'resin-tough', 'resin-flexible']],
         ];
+
+        $filamentTypeIdsBySlug = FilamentType::pluck('id', 'slug');
 
         $printerModels = [];
         foreach ($printers as $printer) {
-            $printerModels[$printer['name']] = Printer::firstOrCreate(
+            $filamentSlugs = $printer['filament_types'];
+            unset($printer['filament_types']);
+
+            $printerModels[$printer['name']] = $model = Printer::updateOrCreate(
                 ['user_id' => $user->id, 'name' => $printer['name']],
                 array_merge(['user_id' => $user->id], $printer)
             );
+
+            $model->filamentTypes()->sync($filamentTypeIdsBySlug->only($filamentSlugs));
         }
 
         $materials = [

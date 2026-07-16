@@ -16,7 +16,7 @@ class PrinterValidationTest extends TestCase
 
         $this->actingAs($user)
             ->post('/impressoras', [])
-            ->assertSessionHasErrors(['name', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance']);
+            ->assertSessionHasErrors(['name', 'technology', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance']);
     }
 
     public function test_store_rejects_zero_useful_life_hours(): void
@@ -26,6 +26,7 @@ class PrinterValidationTest extends TestCase
         $this->actingAs($user)
             ->post('/impressoras', [
                 'name' => 'Ender 3',
+                'technology' => 'fdm',
                 'purchase_price' => 1000,
                 'useful_life_hours' => 0,
                 'power_w' => 200,

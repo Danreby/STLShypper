@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\PrinterTechnology;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Printer extends Model
@@ -13,12 +15,13 @@ class Printer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'name', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance', 'purchase_url',
+        'user_id', 'name', 'technology', 'purchase_price', 'useful_life_hours', 'power_w', 'annual_maintenance', 'purchase_url',
     ];
 
     protected function casts(): array
     {
         return [
+            'technology' => PrinterTechnology::class,
             'purchase_price' => 'decimal:2',
             'useful_life_hours' => 'integer',
             'power_w' => 'integer',
@@ -34,6 +37,11 @@ class Printer extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function filamentTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(FilamentType::class);
     }
 
     public function depreciationPerHour(): float

@@ -2,7 +2,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/DataDisplay/Card';
 import FormField from '@/Components/Form/FormField';
 import AlertSuccess from '@/Components/Feedback/AlertSuccess';
+import FilamentTypeChipPicker from '@/Components/Form/FilamentTypeChipPicker';
 import Input from '@/Components/Form/Input';
+import TechnologyToggle from '@/Components/Form/TechnologyToggle';
 import DataTable from '@/Components/DataDisplay/DataTable';
 import DetailsModal from '@/Components/Overlays/DetailsModal';
 import FilterBar from '@/Components/FilterBar';
@@ -17,10 +19,26 @@ import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
-import { Clock, Coins, ExternalLink, Gauge, Link2, Pencil, Plus, Printer as PrinterIcon, Tag, Trash2, Wrench } from 'lucide-react';
+import {
+    Clock,
+    Coins,
+    Droplets,
+    ExternalLink,
+    Gauge,
+    Layers,
+    Link2,
+    Pencil,
+    Plus,
+    Printer as PrinterIcon,
+    Tag,
+    Trash2,
+    Wrench,
+} from 'lucide-react';
 
 const emptyForm = {
     name: '',
+    technology: 'fdm',
+    filament_type_ids: [],
     purchase_price: '',
     useful_life_hours: 8000,
     power_w: '',
@@ -28,8 +46,54 @@ const emptyForm = {
     purchase_url: '',
 };
 
+function TechnologyBadge({ technology, label }) {
+    const Icon = technology === 'resin' ? Droplets : Layers;
+    return (
+        <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                technology === 'resin'
+                    ? 'bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300'
+                    : 'bg-brand-100 text-brand-700 dark:bg-brand-500/10 dark:text-accent-400'
+            }`}
+        >
+            <Icon size={12} /> {label}
+        </span>
+    );
+}
+
+function FilamentTypeChips({ types }) {
+    if (!types || types.length === 0) return <span className="text-slate-400 dark:text-slate-500">—</span>;
+    const visible = types.slice(0, 3);
+    const overflow = types.length - visible.length;
+    return (
+        <div className="flex flex-wrap items-center gap-1">
+            {visible.map((type) => (
+                <span
+                    key={type.id}
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-white/5 dark:text-slate-300"
+                >
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: type.color }} />
+                    {type.name}
+                </span>
+            ))}
+            {overflow > 0 && <span className="text-xs text-slate-400 dark:text-slate-500">+{overflow}</span>}
+        </div>
+    );
+}
+
 const columns = [
     { key: 'name', header: 'Nome', sortable: true },
+    {
+        key: 'technology',
+        header: 'Tecnologia',
+        sortable: true,
+        render: (p) => <TechnologyBadge technology={p.technology} label={p.technology_label} />,
+    },
+    {
+        key: 'filament_types',
+        header: 'Materiais aceitos',
+        render: (p) => <FilamentTypeChips types={p.filament_types} />,
+    },
     { key: 'purchase_price', header: 'Preço', sortable: true, render: (p) => formatCurrency(p.purchase_price) },
     { key: 'useful_life_hours', header: 'Vida útil', sortable: true, render: (p) => `${p.useful_life_hours} h` },
     { key: 'power_w', header: 'Potência', sortable: true, render: (p) => `${p.power_w} W` },
@@ -64,7 +128,7 @@ const columns = [
     },
 ];
 
-export default function Printers({ printers, filters, pagination }) {
+export default function Printers({ printers, filters, pagination, filamentTypes }) {
     const { flash } = usePage().props;
     const { sort, direction, onSort } = useSort('printers.index', filters);
     const details = useDetailsModal();
@@ -75,6 +139,8 @@ export default function Printers({ printers, filters, pagination }) {
         deleteUrl: (id) => `/impressoras/${id}`,
         mapRowToForm: (printer) => ({
             name: printer.name,
+            technology: printer.technology,
+            filament_type_ids: printer.filament_types.map((t) => t.id),
             purchase_price: printer.purchase_price,
             useful_life_hours: printer.useful_life_hours,
             power_w: printer.power_w,
@@ -82,6 +148,17 @@ export default function Printers({ printers, filters, pagination }) {
             purchase_url: printer.purchase_url ?? '',
         }),
     });
+
+    const availableTypes = filamentTypes.filter((t) => t.technology === data.technology);
+
+    function handleTechnologyChange(technology) {
+        const allowedIds = filamentTypes.filter((t) => t.technology === technology).map((t) => t.id);
+        setData((current) => ({
+            ...current,
+            technology,
+            filament_type_ids: current.filament_type_ids.filter((id) => allowedIds.includes(id)),
+        }));
+    }
 
     return (
         <>
@@ -146,7 +223,24 @@ export default function Printers({ printers, filters, pagination }) {
                         <FormField label="Nome" error={errors.name} icon={Tag} index={0} className="sm:col-span-2">
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} maxLength={255} autoFocus />
                         </FormField>
-                        <FormField label="Preço de compra (R$)" error={errors.purchase_price} icon={Coins} index={1}>
+                        <FormField label="Tecnologia" error={errors.technology} index={1} className="sm:col-span-2">
+                            <TechnologyToggle value={data.technology} onChange={handleTechnologyChange} />
+                        </FormField>
+                        <FormField
+                            label="Tipos de material aceitos"
+                            hint="Selecione um ou mais tipos que esta impressora consegue usar"
+                            error={errors.filament_type_ids}
+                            icon={Layers}
+                            index={2}
+                            className="sm:col-span-2"
+                        >
+                            <FilamentTypeChipPicker
+                                types={availableTypes}
+                                value={data.filament_type_ids}
+                                onChange={(ids) => setData('filament_type_ids', ids)}
+                            />
+                        </FormField>
+                        <FormField label="Preço de compra (R$)" error={errors.purchase_price} icon={Coins} index={3}>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -156,7 +250,7 @@ export default function Printers({ printers, filters, pagination }) {
                                 onChange={(e) => setData('purchase_price', e.target.value)}
                             />
                         </FormField>
-                        <FormField label="Vida útil (horas)" error={errors.useful_life_hours} icon={Clock} index={2}>
+                        <FormField label="Vida útil (horas)" error={errors.useful_life_hours} icon={Clock} index={4}>
                             <Input
                                 type="number"
                                 min="1"
@@ -165,7 +259,7 @@ export default function Printers({ printers, filters, pagination }) {
                                 onChange={(e) => setData('useful_life_hours', e.target.value)}
                             />
                         </FormField>
-                        <FormField label="Potência (W)" error={errors.power_w} icon={Gauge} index={3}>
+                        <FormField label="Potência (W)" error={errors.power_w} icon={Gauge} index={5}>
                             <Input
                                 type="number"
                                 min="1"
@@ -174,7 +268,7 @@ export default function Printers({ printers, filters, pagination }) {
                                 onChange={(e) => setData('power_w', e.target.value)}
                             />
                         </FormField>
-                        <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance} icon={Wrench} index={4}>
+                        <FormField label="Manutenção anual (R$)" error={errors.annual_maintenance} icon={Wrench} index={6}>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -184,7 +278,7 @@ export default function Printers({ printers, filters, pagination }) {
                                 onChange={(e) => setData('annual_maintenance', e.target.value)}
                             />
                         </FormField>
-                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} icon={Link2} index={5} className="sm:col-span-2">
+                        <FormField label="Link de compra (opcional)" error={errors.purchase_url} icon={Link2} index={7} className="sm:col-span-2">
                             <Input
                                 type="url"
                                 placeholder="https://..."
@@ -214,6 +308,16 @@ export default function Printers({ printers, filters, pagination }) {
                 onEdit={() => startEdit(details.row)}
                 fields={
                     details.row && [
+                        {
+                            label: 'Tecnologia',
+                            value: <TechnologyBadge technology={details.row.technology} label={details.row.technology_label} />,
+                            icon: details.row.technology === 'resin' ? Droplets : Layers,
+                        },
+                        {
+                            label: 'Materiais aceitos',
+                            value: <FilamentTypeChips types={details.row.filament_types} />,
+                            icon: Layers,
+                        },
                         { label: 'Preço de compra', value: formatCurrency(details.row.purchase_price), icon: Coins },
                         { label: 'Vida útil', value: `${details.row.useful_life_hours} h`, icon: Clock },
                         { label: 'Potência', value: `${details.row.power_w} W`, icon: Gauge },

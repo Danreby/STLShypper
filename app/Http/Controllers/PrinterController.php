@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Printer\SyncPrinterFilamentTypes;
 use App\Http\Controllers\Concerns\PaginatesRows;
 use App\Http\Controllers\Concerns\SortsRows;
 use App\Http\Requests\Printer\StorePrinterRequest;
 use App\Http\Requests\Printer\UpdatePrinterRequest;
+use App\Http\Resources\FilamentTypeResource;
 use App\Http\Resources\PrinterResource;
+use App\Models\FilamentType;
 use App\Models\Printer;
 use App\Services\UserSettingsResolver;
 use Illuminate\Http\RedirectResponse;
@@ -41,7 +44,7 @@ class PrinterController extends Controller
         $sort = $request->input('sort');
         $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
 
-        $printers = $request->user()->printers()->filter($filters)->get();
+        $printers = $request->user()->printers()->with('filamentTypes')->filter($filters)->get();
 
         $rows = $this->sortRows(
             $printers->map(fn (Printer $printer) => (new PrinterResource($printer, $hoursPerYear))->resolve()),
@@ -62,22 +65,35 @@ class PrinterController extends Controller
                 'total' => $paginator->total(),
             ],
             'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],
+            'filamentTypes' => FilamentTypeResource::collection(
+                FilamentType::orderBy('technology')->orderBy('name')->get()
+            ),
         ]);
     }
 
-    public function store(StorePrinterRequest $request): RedirectResponse
+    public function store(StorePrinterRequest $request, SyncPrinterFilamentTypes $syncFilamentTypes): RedirectResponse
     {
-        $request->user()->printers()->create($request->validated());
+        $data = $request->validated();
+        $filamentTypeIds = $data['filament_type_ids'] ?? [];
+        unset($data['filament_type_ids']);
+
+        $printer = $request->user()->printers()->create($data);
+        $syncFilamentTypes->handle($printer, $filamentTypeIds);
 
         return back()->with('success', 'Impressora cadastrada com sucesso.');
     }
 
-    public function update(UpdatePrinterRequest $request, int $printer): RedirectResponse
+    public function update(UpdatePrinterRequest $request, int $printer, SyncPrinterFilamentTypes $syncFilamentTypes): RedirectResponse
     {
         $model = $request->user()->printers()->findOrFail($printer);
         $this->authorize('update', $model);
 
-        $model->update($request->validated());
+        $data = $request->validated();
+        $filamentTypeIds = $data['filament_type_ids'] ?? [];
+        unset($data['filament_type_ids']);
+
+        $model->update($data);
+        $syncFilamentTypes->handle($model, $filamentTypeIds);
 
         return back()->with('success', 'Impressora atualizada com sucesso.');
     }

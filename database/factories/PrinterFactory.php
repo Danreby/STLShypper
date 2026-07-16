@@ -21,6 +21,7 @@ class PrinterFactory extends Factory
         return [
             'user_id' => User::factory(),
             'name' => fake()->words(2, true),
+            'technology' => 'fdm',
             'purchase_price' => fake()->randomFloat(2, 500, 10000),
             'useful_life_hours' => fake()->numberBetween(2000, 15000),
             'power_w' => fake()->numberBetween(100, 400),

@@ -28,7 +28,7 @@ export default function Sidebar({ collapsed, onToggleCollapse }) {
                             exit={{ opacity: 0 }}
                             className="whitespace-nowrap text-base font-semibold tracking-tight text-slate-900 dark:text-white"
                         >
-                            STL SHypper
+                            STL Shypper
                         </motion.span>
                     )}
                 </Link>

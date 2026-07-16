@@ -17,6 +17,8 @@ class PrinterResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'technology' => $this->technology->value,
+            'technology_label' => $this->technology->label(),
             'purchase_price' => (float) $this->purchase_price,
             'useful_life_hours' => $this->useful_life_hours,
             'power_w' => $this->power_w,
@@ -25,6 +27,7 @@ class PrinterResource extends JsonResource
             'depreciation_per_hour' => round($this->depreciationPerHour(), 4),
             'maintenance_per_hour' => round($this->maintenancePerHour($this->hoursPerYear), 4),
             'total_cost_per_hour' => round($this->totalCostPerHour($this->hoursPerYear), 4),
+            'filament_types' => FilamentTypeResource::collection($this->whenLoaded('filamentTypes')),
         ];
     }
 }

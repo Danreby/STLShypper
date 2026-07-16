@@ -19,6 +19,7 @@ class ResourceOwnershipTest extends TestCase
 
         $this->actingAs($user)->post('/impressoras', [
             'name' => 'Ender 3',
+            'technology' => 'fdm',
             'purchase_price' => 1500,
             'useful_life_hours' => 8000,
             'power_w' => 220,
@@ -79,7 +80,7 @@ class ResourceOwnershipTest extends TestCase
         $printer = Printer::factory()->for($owner)->create();
 
         $this->actingAs($intruder)
-            ->patch("/impressoras/{$printer->id}", ['name' => 'Hijacked', 'purchase_price' => 1, 'useful_life_hours' => 1, 'power_w' => 1, 'annual_maintenance' => 0])
+            ->patch("/impressoras/{$printer->id}", ['name' => 'Hijacked', 'technology' => 'fdm', 'purchase_price' => 1, 'useful_life_hours' => 1, 'power_w' => 1, 'annual_maintenance' => 0])
             ->assertNotFound();
 
         $this->actingAs($intruder)
