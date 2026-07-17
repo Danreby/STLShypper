@@ -23,15 +23,6 @@ function loadGoogleScript() {
     return gsiScriptPromise;
 }
 
-/**
- * Opens Google's OAuth2 popup and resolves with the authorization code.
- *
- * Uses `initCodeClient` (a real popup window, not the One Tap/button
- * overlay) so the code is delivered straight to this callback via
- * `postMessage` — Google never makes a request to our own server for this
- * step, which is what lets this flow dodge shared-hosting WAFs that were
- * blocking the old redirect-based `/auth/google/callback` route.
- */
 export default function useGoogleAuthPopup() {
     return async function requestGoogleAuthorizationCode() {
         await loadGoogleScript();

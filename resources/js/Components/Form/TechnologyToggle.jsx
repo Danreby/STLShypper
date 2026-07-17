@@ -18,9 +18,6 @@ const OPTIONS = [
     },
 ];
 
-/**
- * Seletor de tecnologia da impressora (filamento x resina).
- */
 export default function TechnologyToggle({ value, onChange }) {
     return <SegmentedToggle options={OPTIONS} value={value} onChange={onChange} layoutId="technology-toggle-active" />;
 }

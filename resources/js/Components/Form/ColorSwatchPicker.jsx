@@ -45,12 +45,6 @@ function Swatch({ color, label, active, onClick }) {
     );
 }
 
-/**
- * Seletor de cor com predefinições de filamento comuns + um "custom" via
- * input[type=color] nativo, disfarçado de swatch com gradiente cônico.
- *
- * @param {{ value?: string, onChange: (hex: string) => void }} props
- */
 export default function ColorSwatchPicker({ value, onChange }) {
     const normalized = value ? value.toLowerCase() : '';
     const isCustom = normalized && !PRESETS.some((p) => p.value === normalized);

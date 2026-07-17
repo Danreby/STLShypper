@@ -1,11 +1,5 @@
 import { motion } from 'framer-motion';
 
-/**
- * Seletor de 2+ opções em formato de cartões grandes e clicáveis, com um
- * destaque animado que desliza entre elas (em vez de um <select> comum).
- *
- * @param {{ options: Array<{value:string,label:string,hint?:string,description?:string,icon?:Function}>, value: string, onChange: (v:string) => void, layoutId: string }} props
- */
 export default function SegmentedToggle({ options, value, onChange, layoutId }) {
     return (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -81,8 +81,6 @@ function FilamentTypeChips({ types }) {
     );
 }
 
-// Painel "hero" do modal de detalhes: mostra a tecnologia e a lista completa
-// (sem truncar) de tipos de material aceitos, cada um com sua própria cor.
 function TechnologyAndMaterialsPanel({ printer }) {
     const types = printer.filament_types ?? [];
     const isResin = printer.technology === 'resin';

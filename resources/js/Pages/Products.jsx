@@ -21,7 +21,9 @@ import useCountUp from '@/Hooks/useCountUp';
 import useDetailsModal from '@/Hooks/useDetailsModal';
 import useResourceForm from '@/Hooks/useResourceForm';
 import useSort from '@/Hooks/useSort';
+import { newClientId } from '@/Utils/clientId';
 import { formatCurrency } from '@/Utils/format';
+import { partColor } from '@/Utils/partColors';
 import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
@@ -45,7 +47,15 @@ import {
     Weight,
 } from 'lucide-react';
 
-const emptyPart = () => ({ name: '', printer_id: '', material_id: '', piece_weight_g: '', print_time_h: '', quantity_per_unit: 1 });
+const emptyPart = () => ({
+    _cid: newClientId(),
+    name: '',
+    printer_id: '',
+    material_id: '',
+    piece_weight_g: '',
+    print_time_h: '',
+    quantity_per_unit: 1,
+});
 
 const emptyForm = {
     name: '',
@@ -70,7 +80,6 @@ const PRODUCT_MODE_OPTIONS = [
     },
 ];
 
-// Lista compacta usada na linha expandida da tabela de Produtos.
 function ProductPartsInlineList({ parts }) {
     return (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,16 +108,6 @@ function ProductPartsInlineList({ parts }) {
     );
 }
 
-// Paleta fixa por parte — a mesma cor identifica a parte na barra, na legenda e no painel de
-// detalhe. Além de 8 partes (incomum para um produto composto), reaproveita um cinza neutro.
-const PART_COLORS = ['#6366f1', '#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#d946ef'];
-const partColor = (index) => PART_COLORS[index] ?? '#94a3b8';
-
-/**
- * Visualização das partes de um produto composto no modal de detalhes: uma barra de proporção
- * de custo (cada segmento = quanto aquela parte pesa no custo total), uma legenda clicável e um
- * painel de detalhe da parte selecionada, com transição animada entre partes.
- */
 function ProductPartsBreakdown({ parts, breakdown }) {
     const [activeId, setActiveId] = useState(parts[0]?.id);
     const costById = new Map((breakdown ?? []).map((b) => [b.id, b]));
@@ -118,7 +117,6 @@ function ProductPartsBreakdown({ parts, breakdown }) {
     const activeCost = costById.get(active?.id);
     const animatedCost = useCountUp(activeCost?.cost ?? 0, 0.5);
 
-    // Direção do slide de entrada/saída acompanha a posição relativa das partes na barra.
     const prevIndexRef = useRef(activeIndex);
     const direction = activeIndex >= prevIndexRef.current ? 1 : -1;
     useEffect(() => {
@@ -146,7 +144,6 @@ function ProductPartsBreakdown({ parts, breakdown }) {
                 </span>
             </div>
 
-            {/* Barra de proporção de custo — cada segmento é do tamanho da fatia daquela parte no custo total */}
             <div className="mt-3 flex h-8 w-full gap-0.5">
                 {parts.map((part, index) => {
                     const cost = costById.get(part.id)?.cost ?? 0;
@@ -178,7 +175,6 @@ function ProductPartsBreakdown({ parts, breakdown }) {
                 })}
             </div>
 
-            {/* Legenda / seletor — alvo de toque maior que a barra, essencial no mobile */}
             <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {parts.map((part, index) => {
                     const isActive = part.id === active.id;
@@ -201,7 +197,6 @@ function ProductPartsBreakdown({ parts, breakdown }) {
                 })}
             </div>
 
-            {/* Detalhe da parte selecionada — desliza na direção de onde ela está na barra */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={active.id}

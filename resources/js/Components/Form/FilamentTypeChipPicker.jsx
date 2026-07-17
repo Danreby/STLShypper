@@ -9,13 +9,6 @@ function isLight(hex) {
     return (r * 299 + g * 587 + b * 114) / 1000 > 150;
 }
 
-/**
- * Seletor de múltiplos tipos de material (PLA, PETG, TPU...) aceitos pela
- * impressora, em formato de chips coloridos — cada chip herda a cor
- * cadastrada para o tipo, tanto selecionado quanto no estado neutro.
- *
- * @param {{ types: Array<{id:number,name:string,color:string}>, value: number[], onChange: (ids: number[]) => void }} props
- */
 export default function FilamentTypeChipPicker({ types, value, onChange }) {
     function toggle(id) {
         onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
