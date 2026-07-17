@@ -46,7 +46,7 @@ class ProductController extends Controller
         $sort = $request->input('sort');
         $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
 
-        $products = $user->products()->with(['printer', 'material'])->filter($filters)->get();
+        $products = $user->products()->with(['printer', 'material', 'parts.printer', 'parts.material'])->filter($filters)->get();
 
         $rows = $products->map(fn (Product $product) => (new ProductResource($product, $settings))->resolve());
 
@@ -75,27 +75,42 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $settings = $this->settingsResolver->forUser($request->user());
+        $partsData = $data['parts'] ?? [];
+        unset($data['parts']);
 
-        $request->user()->products()->create($data);
+        $product = $request->user()->products()->create($data);
 
-        $warning = $this->consumeMaterialStock($request->user(), $data['material_id'] ?? null, $data, $settings);
+        if (! empty($partsData)) {
+            $product->parts()->createMany($partsData);
+        }
+
+        $entries = $this->materialConsumptionEntries([...$data, 'parts' => $partsData], $settings);
+        $warning = $this->consumeMaterialStock($request->user(), $entries);
 
         return $this->redirectWithFlash('Produto cadastrado com sucesso.', $warning);
     }
 
     public function update(UpdateProductRequest $request, int $product): RedirectResponse
     {
-        $model = $request->user()->products()->findOrFail($product);
+        $model = $request->user()->products()->with('parts')->findOrFail($product);
         $this->authorize('update', $model);
 
         $settings = $this->settingsResolver->forUser($request->user());
         $data = $request->validated();
+        $partsData = $data['parts'] ?? [];
+        unset($data['parts']);
 
-        $this->restoreMaterialStock($request->user(), $model->material_id, $model->only(['piece_weight_g', 'quantity', 'extra_material_pct']), $settings);
+        $oldEntries = $this->materialConsumptionEntries($this->productAsConsumptionInput($model), $settings);
+        $this->restoreMaterialStock($request->user(), $oldEntries);
 
         $model->update($data);
+        $model->parts()->delete();
+        if (! empty($partsData)) {
+            $model->parts()->createMany($partsData);
+        }
 
-        $warning = $this->consumeMaterialStock($request->user(), $data['material_id'] ?? null, $data, $settings);
+        $newEntries = $this->materialConsumptionEntries([...$data, 'parts' => $partsData], $settings);
+        $warning = $this->consumeMaterialStock($request->user(), $newEntries);
 
         return $this->redirectWithFlash('Produto atualizado com sucesso.', $warning);
     }
@@ -103,7 +118,7 @@ class ProductController extends Controller
     public function pdf(Request $request, int $product)
     {
         $settings = $this->settingsResolver->forUser($request->user());
-        $model = $request->user()->products()->with(['printer', 'material'])->findOrFail($product);
+        $model = $request->user()->products()->with(['printer', 'material', 'parts.printer', 'parts.material'])->findOrFail($product);
 
         $pdf = Pdf::loadView('pdf.product-quote', [
             'product' => $model,
@@ -117,11 +132,12 @@ class ProductController extends Controller
 
     public function destroy(Request $request, int $product): RedirectResponse
     {
-        $model = $request->user()->products()->findOrFail($product);
+        $model = $request->user()->products()->with('parts')->findOrFail($product);
         $this->authorize('delete', $model);
 
         $settings = $this->settingsResolver->forUser($request->user());
-        $this->restoreMaterialStock($request->user(), $model->material_id, $model->only(['piece_weight_g', 'quantity', 'extra_material_pct']), $settings);
+        $entries = $this->materialConsumptionEntries($this->productAsConsumptionInput($model), $settings);
+        $this->restoreMaterialStock($request->user(), $entries);
 
         $model->delete();
 
@@ -136,46 +152,100 @@ class ProductController extends Controller
     }
 
     /**
-     * Desconta do estoque do material o peso consumido pelo pedido. Retorna uma mensagem de
-     * aviso quando o estoque restante fica zerado ou negativo, ou null quando está tudo certo.
+     * Representa o estado atual de um produto (já persistido) no mesmo formato usado pelos dados
+     * de request, para reaproveitar materialConsumptionEntries() tanto ao consumir quanto ao
+     * restaurar estoque.
      */
-    private function consumeMaterialStock(User $user, ?int $materialId, array $data, Setting $settings): ?string
+    private function productAsConsumptionInput(Product $product): array
     {
-        if (! $materialId) {
-            return null;
-        }
-
-        $material = $user->materials()->find($materialId);
-        if (! $material) {
-            return null;
-        }
-
-        $consumedKg = round(PricingCalculator::materialConsumptionKg($data, $settings), 2);
-        $material->decrement('qtd', $consumedKg);
-
-        if ((float) $material->qtd <= 0) {
-            return "Estoque de \"{$material->name}\" ficou zerado ou negativo. Considere repor.";
-        }
-
-        return null;
+        return [
+            'material_id' => $product->material_id,
+            'piece_weight_g' => $product->piece_weight_g,
+            'quantity' => $product->quantity,
+            'extra_material_pct' => $product->extra_material_pct,
+            'parts' => $product->parts->map(fn ($part) => [
+                'material_id' => $part->material_id,
+                'piece_weight_g' => (float) $part->piece_weight_g,
+                'quantity_per_unit' => $part->quantity_per_unit,
+            ])->all(),
+        ];
     }
 
     /**
-     * Devolve ao estoque do material o peso que havia sido consumido por um pedido (usado antes
-     * de atualizar ou remover o pedido, para não perder rastreio do estoque real).
+     * Calcula quanto (kg) cada material é consumido por um produto — somando as partes quando o
+     * produto é composto, ou usando o material único quando é uma peça simples. Retorna um mapa
+     * [material_id => kg].
+     *
+     * @return array<int, float>
      */
-    private function restoreMaterialStock(User $user, ?int $materialId, array $data, Setting $settings): void
+    private function materialConsumptionEntries(array $data, Setting $settings): array
     {
-        if (! $materialId) {
-            return;
+        $quantity = (int) ($data['quantity'] ?? 1);
+        $parts = $data['parts'] ?? [];
+
+        if (! empty($parts)) {
+            $totals = [];
+            foreach ($parts as $part) {
+                if (empty($part['material_id'])) {
+                    continue;
+                }
+
+                $kg = PricingCalculator::materialConsumptionKg([
+                    'piece_weight_g' => (float) ($part['piece_weight_g'] ?? 0) * max(1, (int) ($part['quantity_per_unit'] ?? 1)),
+                    'quantity' => $quantity,
+                    'extra_material_pct' => $data['extra_material_pct'] ?? null,
+                ], $settings);
+
+                $totals[$part['material_id']] = ($totals[$part['material_id']] ?? 0) + $kg;
+            }
+
+            return $totals;
         }
 
-        $material = $user->materials()->find($materialId);
-        if (! $material) {
-            return;
+        if (empty($data['material_id'])) {
+            return [];
         }
 
-        $consumedKg = round(PricingCalculator::materialConsumptionKg($data, $settings), 2);
-        $material->increment('qtd', $consumedKg);
+        return [$data['material_id'] => PricingCalculator::materialConsumptionKg($data, $settings)];
+    }
+
+    /**
+     * Desconta do estoque de cada material o peso consumido pelo pedido. Retorna uma mensagem de
+     * aviso quando algum estoque restante fica zerado ou negativo, ou null quando está tudo certo.
+     */
+    private function consumeMaterialStock(User $user, array $entries): ?string
+    {
+        $warning = null;
+
+        foreach ($entries as $materialId => $kg) {
+            $material = $user->materials()->find($materialId);
+            if (! $material) {
+                continue;
+            }
+
+            $material->decrement('qtd', round($kg, 2));
+
+            if ((float) $material->qtd <= 0) {
+                $warning = "Estoque de \"{$material->name}\" ficou zerado ou negativo. Considere repor.";
+            }
+        }
+
+        return $warning;
+    }
+
+    /**
+     * Devolve ao estoque de cada material o peso que havia sido consumido por um pedido (usado
+     * antes de atualizar ou remover o pedido, para não perder rastreio do estoque real).
+     */
+    private function restoreMaterialStock(User $user, array $entries): void
+    {
+        foreach ($entries as $materialId => $kg) {
+            $material = $user->materials()->find($materialId);
+            if (! $material) {
+                continue;
+            }
+
+            $material->increment('qtd', round($kg, 2));
+        }
     }
 }

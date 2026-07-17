@@ -24,7 +24,7 @@ class ExportController extends Controller
 
         $printers = $user->printers()->orderBy('name')->get();
         $materials = $user->materials()->orderBy('name')->get();
-        $products = $user->products()->with(['printer', 'material'])->orderBy('name')->get();
+        $products = $user->products()->with(['printer', 'material', 'parts.printer', 'parts.material'])->orderBy('name')->get();
 
         $productRows = $products->map(fn ($product) => (new ProductResource($product, $settings))->resolve())->values();
 

@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $user = $request->user();
         $settings = $this->settingsResolver->forUser($user);
 
-        $products = $user->products()->with(['printer', 'material'])->get();
+        $products = $user->products()->with(['printer', 'material', 'parts.printer', 'parts.material'])->get();
 
         $priced = $products->map(fn ($product) => [
             'name' => $product->name,

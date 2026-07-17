@@ -34,6 +34,8 @@ class ProductResource extends JsonResource
             'tax_pct' => $this->tax_pct,
             'fee_pct' => $this->fee_pct,
             'margin_pct' => $this->margin_pct,
+            'is_composite' => $this->parts->isNotEmpty(),
+            'parts' => ProductPartResource::collection($this->parts),
             'pricing' => PricingCalculator::calculateForProduct($this->resource, $this->settings),
         ];
     }
