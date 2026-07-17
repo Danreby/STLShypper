@@ -91,16 +91,6 @@ class PricingCalculator
         ], $settings);
     }
 
-    /**
-     * Um produto composto é feito de várias impressões separadas (ex.: cabeça, pernas, braços),
-     * cada uma com sua própria impressora/material/peso/tempo. Somamos o custo de cada parte e
-     * aplicamos exatamente as mesmas regras de perdas/impostos/taxas/margem de um produto simples.
-     *
-     * Convenção (espelha o produto simples): piece_weight_g da parte é o peso de UMA unidade da
-     * parte; quantity_per_unit é quantas unidades da parte cada produto final leva (ex.: 2 pernas);
-     * print_time_h da parte é o tempo total da(s) mesa(s) para produzir a quantidade do pedido
-     * inteiro — por isso dividimos pela quantidade do produto para chegar ao tempo por unidade.
-     */
     public static function calculateForParts(Product $product, iterable $parts, Setting $settings): array
     {
         $quantity = max(1, (int) $product->quantity);
@@ -112,6 +102,7 @@ class PricingCalculator
         $machineCost = 0.0;
         $totalWeight = 0.0;
         $printTimeTotal = 0.0;
+        $partsBreakdown = [];
 
         foreach ($parts as $part) {
             $weightPerUnit = (float) $part->piece_weight_g * max(1, (int) $part->quantity_per_unit);
@@ -123,14 +114,26 @@ class PricingCalculator
 
             $weightWithExtra = $weightPerUnit * (1 + $extraMaterialPct);
 
-            $materialCost += $weightWithExtra * $materialPricePerKg / 1000;
-            $energyCost += $printerPowerW * $timePerUnit * (float) $settings->kwh_price / 1000;
-            $machineCost += $printerCostPerHour * $timePerUnit;
+            $partMaterialCost = $weightWithExtra * $materialPricePerKg / 1000;
+            $partEnergyCost = $printerPowerW * $timePerUnit * (float) $settings->kwh_price / 1000;
+            $partMachineCost = $printerCostPerHour * $timePerUnit;
+
+            $materialCost += $partMaterialCost;
+            $energyCost += $partEnergyCost;
+            $machineCost += $partMachineCost;
             $totalWeight += $weightWithExtra;
             $printTimeTotal += (float) $part->print_time_h;
+
+            $partsBreakdown[] = [
+                'id' => $part->id,
+                'material_cost' => round($partMaterialCost, 2),
+                'energy_cost' => round($partEnergyCost, 2),
+                'machine_cost' => round($partMachineCost, 2),
+                'cost' => round($partMaterialCost + $partEnergyCost + $partMachineCost, 2),
+            ];
         }
 
-        return self::compose(
+        $result = self::compose(
             materialCost: $materialCost,
             energyCost: $energyCost,
             machineCost: $machineCost,
@@ -146,6 +149,10 @@ class PricingCalculator
             feePct: self::resolve($product->fee_pct, $settings->fee_pct),
             marginPct: self::resolve($product->margin_pct, $settings->margin_pct),
         );
+
+        $result['parts_breakdown'] = $partsBreakdown;
+
+        return $result;
     }
 
     private static function resolve(mixed $override, mixed $default): float
@@ -153,10 +160,6 @@ class PricingCalculator
         return $override !== null && $override !== '' ? (float) $override : (float) $default;
     }
 
-    /**
-     * Parte comum a produtos simples e compostos: a partir dos custos já somados (material,
-     * energia, máquina), aplica mão de obra/custos extras, perdas, impostos, taxas e margem.
-     */
     private static function compose(
         float $materialCost,
         float $energyCost,
@@ -213,6 +216,7 @@ class PricingCalculator
             'total_price' => round($suggestedPrice * $quantity, 2),
             'total_profit' => round($profitPerUnit * $quantity, 2),
             'denominator_warning' => $denominator <= 0,
+            'parts_breakdown' => [],
         ];
     }
 }

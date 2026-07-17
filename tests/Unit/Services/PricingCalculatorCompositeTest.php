@@ -61,6 +61,29 @@ class PricingCalculatorCompositeTest extends TestCase
         $this->assertSame(32.0, $pricing['subtotal_cost']);
         $this->assertSame(32.0, $pricing['cost_with_losses']);
         $this->assertSame(32.0, $pricing['suggested_price_per_unit']);
+
+        // Custo individual de cada parte (usado no painel de abas do modal de detalhes).
+        $head = $product->parts->firstWhere('name', 'Cabeça');
+        $legs = $product->parts->firstWhere('name', 'Pernas');
+        $breakdown = collect($pricing['parts_breakdown'])->keyBy('id');
+
+        $this->assertSame(14.0, $breakdown[$head->id]['cost']);
+        $this->assertSame(10.0, $breakdown[$head->id]['material_cost']);
+        $this->assertSame(2.0, $breakdown[$head->id]['energy_cost']);
+        $this->assertSame(2.0, $breakdown[$head->id]['machine_cost']);
+
+        $this->assertSame(18.0, $breakdown[$legs->id]['cost']);
+    }
+
+    public function test_a_simple_product_has_an_empty_parts_breakdown(): void
+    {
+        $user = User::factory()->create();
+        $settings = (new UserSettingsResolver())->forUser($user);
+        $product = Product::factory()->for($user)->create();
+
+        $pricing = PricingCalculator::calculateForProduct($product, $settings);
+
+        $this->assertSame([], $pricing['parts_breakdown']);
     }
 
     public function test_part_print_time_is_shared_across_the_order_quantity(): void

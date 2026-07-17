@@ -73,7 +73,7 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $this->withCompositeDefaults($request->validated());
         $settings = $this->settingsResolver->forUser($request->user());
         $partsData = $data['parts'] ?? [];
         unset($data['parts']);
@@ -96,7 +96,7 @@ class ProductController extends Controller
         $this->authorize('update', $model);
 
         $settings = $this->settingsResolver->forUser($request->user());
-        $data = $request->validated();
+        $data = $this->withCompositeDefaults($request->validated());
         $partsData = $data['parts'] ?? [];
         unset($data['parts']);
 
@@ -144,6 +144,14 @@ class ProductController extends Controller
         return back()->with('success', 'Produto removido.');
     }
 
+    private function withCompositeDefaults(array $data): array
+    {
+        $data['piece_weight_g'] ??= 0;
+        $data['print_time_h'] ??= 0;
+
+        return $data;
+    }
+
     private function redirectWithFlash(string $success, ?string $warning): RedirectResponse
     {
         $response = back()->with('success', $success);
@@ -151,11 +159,6 @@ class ProductController extends Controller
         return $warning ? $response->with('warning', $warning) : $response;
     }
 
-    /**
-     * Representa o estado atual de um produto (já persistido) no mesmo formato usado pelos dados
-     * de request, para reaproveitar materialConsumptionEntries() tanto ao consumir quanto ao
-     * restaurar estoque.
-     */
     private function productAsConsumptionInput(Product $product): array
     {
         return [

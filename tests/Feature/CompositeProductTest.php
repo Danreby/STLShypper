@@ -42,7 +42,7 @@ class CompositeProductTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->post('/produtos', [
+        $response = $this->actingAs($user)->post('/produtos', [
             'name' => 'Action Figure',
             'labor_cost' => 5,
             'extra_fixed_costs' => 0,
@@ -50,7 +50,16 @@ class CompositeProductTest extends TestCase
             'parts' => [
                 ['name' => 'Cabeça', 'piece_weight_g' => 10, 'print_time_h' => 2],
             ],
-        ])->assertSessionDoesntHaveErrors(['piece_weight_g', 'print_time_h']);
+        ]);
+
+        $response->assertSessionDoesntHaveErrors(['piece_weight_g', 'print_time_h']);
+        $response->assertRedirect();
+
+        // O produto em si não tem peso/tempo próprios quando é composto — a coluna não aceita
+        // NULL, então o controller precisa preencher com 0 em vez de deixar nulo (regressão).
+        $product = Product::where('user_id', $user->id)->firstOrFail();
+        $this->assertSame('0.00', $product->piece_weight_g);
+        $this->assertSame('0.00', $product->print_time_h);
     }
 
     public function test_store_still_requires_piece_weight_when_not_composite(): void

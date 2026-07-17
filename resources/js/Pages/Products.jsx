@@ -17,12 +17,14 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import PageHeading from '@/Components/DataDisplay/PageHeading';
 import ExportExcel from '@/Components/ExportExcel';
+import useCountUp from '@/Hooks/useCountUp';
 import useDetailsModal from '@/Hooks/useDetailsModal';
 import useResourceForm from '@/Hooks/useResourceForm';
 import useSort from '@/Hooks/useSort';
 import { formatCurrency } from '@/Utils/format';
 import { Head, usePage } from '@inertiajs/react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import {
     AlertTriangle,
     Blocks,
@@ -68,27 +70,205 @@ const PRODUCT_MODE_OPTIONS = [
     },
 ];
 
-function ProductPartsPanel({ parts }) {
+// Lista compacta usada na linha expandida da tabela de Produtos.
+function ProductPartsInlineList({ parts }) {
     return (
-        <div className="rounded-2xl border border-brand-200/70 bg-linear-to-br from-brand-50 to-accent-400/10 p-4 dark:border-white/10 dark:from-brand-500/10 dark:to-accent-400/5">
-            <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                Partes da impressão ({parts.length})
-            </span>
-            <div className="mt-2.5 space-y-2">
-                {parts.map((part) => (
-                    <div
-                        key={part.id}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl border border-black/5 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-white/10"
-                    >
-                        <span className="font-semibold text-slate-800 dark:text-slate-100">
-                            {part.name} {part.quantity_per_unit > 1 && <span className="text-slate-400">×{part.quantity_per_unit}</span>}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {parts.map((part) => (
+                <div
+                    key={part.id}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-slate-900/40"
+                >
+                    <div className="flex items-center justify-between gap-2">
+                        <span className="truncate font-semibold text-slate-800 dark:text-slate-100">{part.name}</span>
+                        {part.quantity_per_unit > 1 && (
+                            <span className="shrink-0 rounded-full bg-brand-500/10 px-1.5 py-0.5 text-[11px] font-medium text-brand-600 dark:bg-accent-400/10 dark:text-accent-400">
+                                ×{part.quantity_per_unit}
+                            </span>
+                        )}
+                    </div>
+                    <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                        {part.printer_name ?? '—'} · {part.material_name ?? '—'}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        {part.piece_weight_g} g · {part.print_time_h} h
+                    </p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+// Paleta fixa por parte — a mesma cor identifica a parte na barra, na legenda e no painel de
+// detalhe. Além de 8 partes (incomum para um produto composto), reaproveita um cinza neutro.
+const PART_COLORS = ['#6366f1', '#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#d946ef'];
+const partColor = (index) => PART_COLORS[index] ?? '#94a3b8';
+
+/**
+ * Visualização das partes de um produto composto no modal de detalhes: uma barra de proporção
+ * de custo (cada segmento = quanto aquela parte pesa no custo total), uma legenda clicável e um
+ * painel de detalhe da parte selecionada, com transição animada entre partes.
+ */
+function ProductPartsBreakdown({ parts, breakdown }) {
+    const [activeId, setActiveId] = useState(parts[0]?.id);
+    const costById = new Map((breakdown ?? []).map((b) => [b.id, b]));
+    const total = Math.max(parts.reduce((sum, p) => sum + (costById.get(p.id)?.cost ?? 0), 0), 0.01);
+    const activeIndex = Math.max(parts.findIndex((p) => p.id === activeId), 0);
+    const active = parts[activeIndex] ?? parts[0];
+    const activeCost = costById.get(active?.id);
+    const animatedCost = useCountUp(activeCost?.cost ?? 0, 0.5);
+
+    // Direção do slide de entrada/saída acompanha a posição relativa das partes na barra.
+    const prevIndexRef = useRef(activeIndex);
+    const direction = activeIndex >= prevIndexRef.current ? 1 : -1;
+    useEffect(() => {
+        prevIndexRef.current = activeIndex;
+    }, [activeIndex]);
+
+    if (!active) return null;
+
+    const costRows = activeCost
+        ? [
+              { label: 'Material', value: activeCost.material_cost },
+              { label: 'Energia', value: activeCost.energy_cost },
+              { label: 'Máquina', value: activeCost.machine_cost },
+          ]
+        : [];
+
+    return (
+        <div className="overflow-hidden rounded-2xl border border-brand-200/70 bg-linear-to-br from-brand-50 to-accent-400/10 p-4 dark:border-white/10 dark:from-brand-500/10 dark:to-accent-400/5">
+            <div className="flex flex-wrap items-center justify-between gap-1">
+                <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                    Partes da impressão ({parts.length})
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Custo total <strong className="text-slate-700 dark:text-slate-200">{formatCurrency(total)}</strong> /un.
+                </span>
+            </div>
+
+            {/* Barra de proporção de custo — cada segmento é do tamanho da fatia daquela parte no custo total */}
+            <div className="mt-3 flex h-8 w-full gap-0.5">
+                {parts.map((part, index) => {
+                    const cost = costById.get(part.id)?.cost ?? 0;
+                    const pct = (cost / total) * 100;
+                    const isActive = part.id === active.id;
+                    return (
+                        <motion.button
+                            key={part.id}
+                            type="button"
+                            onClick={() => setActiveId(part.id)}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%`, opacity: isActive ? 1 : 0.55 }}
+                            whileHover={{ opacity: 0.85 }}
+                            transition={{ width: { duration: 0.5, delay: index * 0.05, ease: 'easeOut' }, opacity: { duration: 0.15 } }}
+                            title={`${part.name} — ${formatCurrency(cost)}`}
+                            className="focus-ring relative flex min-w-1.5 items-center justify-center overflow-hidden rounded-sm first:rounded-l-lg last:rounded-r-lg"
+                            style={{ backgroundColor: partColor(index) }}
+                        >
+                            {isActive && (
+                                <motion.span
+                                    layoutId="product-part-bar-ring"
+                                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                                    className="absolute inset-0 rounded-sm ring-2 ring-white/90 ring-inset dark:ring-slate-950/60"
+                                />
+                            )}
+                            {pct > 12 && <span className="relative text-[10px] font-semibold text-white drop-shadow-sm">{Math.round(pct)}%</span>}
+                        </motion.button>
+                    );
+                })}
+            </div>
+
+            {/* Legenda / seletor — alvo de toque maior que a barra, essencial no mobile */}
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {parts.map((part, index) => {
+                    const isActive = part.id === active.id;
+                    return (
+                        <button
+                            key={part.id}
+                            type="button"
+                            onClick={() => setActiveId(part.id)}
+                            className={`focus-ring inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                                isActive
+                                    ? 'bg-white shadow-sm dark:bg-white/15'
+                                    : 'text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/5'
+                            }`}
+                        >
+                            <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: partColor(index) }} />
+                            <span className={isActive ? 'text-slate-800 dark:text-slate-100' : ''}>{part.name}</span>
+                            {part.quantity_per_unit > 1 && <span className="text-slate-400">×{part.quantity_per_unit}</span>}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Detalhe da parte selecionada — desliza na direção de onde ela está na barra */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={active.id}
+                    initial={{ opacity: 0, x: 14 * direction }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -14 * direction }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="mt-3 rounded-xl border border-black/5 bg-white p-3.5 dark:border-white/10 dark:bg-white/10"
+                >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
+                            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: partColor(activeIndex) }} />
+                            {active.name}
+                            {active.quantity_per_unit > 1 && (
+                                <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-[11px] font-medium text-brand-600 dark:bg-accent-400/10 dark:text-accent-400">
+                                    ×{active.quantity_per_unit}
+                                </span>
+                            )}
                         </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {part.printer_name ?? '—'} · {part.material_name ?? '—'} · {part.piece_weight_g} g · {part.print_time_h} h
+                        <span className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">
+                            {formatCurrency(animatedCost)}
+                            <span className="ml-1 text-xs font-normal text-slate-400">/un.</span>
                         </span>
                     </div>
-                ))}
-            </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+                        <div>
+                            <p className="text-xs text-slate-400">Impressora</p>
+                            <p className="truncate font-medium text-slate-700 dark:text-slate-200">{active.printer_name ?? '—'}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-400">Material</p>
+                            <p className="truncate font-medium text-slate-700 dark:text-slate-200">{active.material_name ?? '—'}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-400">Peso (un.)</p>
+                            <p className="font-medium text-slate-700 dark:text-slate-200">{active.piece_weight_g} g</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-400">Tempo total</p>
+                            <p className="font-medium text-slate-700 dark:text-slate-200">{active.print_time_h} h</p>
+                        </div>
+                    </div>
+
+                    {costRows.length > 0 && (
+                        <div className="mt-3 space-y-1.5">
+                            {costRows.map((row) => (
+                                <div key={row.label} className="flex items-center gap-2 text-xs">
+                                    <span className="w-14 shrink-0 text-slate-400">{row.label}</span>
+                                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${Math.min((row.value / Math.max(activeCost.cost, 0.01)) * 100, 100)}%` }}
+                                            transition={{ duration: 0.4, ease: 'easeOut' }}
+                                            className="h-full rounded-full"
+                                            style={{ backgroundColor: partColor(activeIndex) }}
+                                        />
+                                    </div>
+                                    <span className="w-16 shrink-0 text-right font-medium text-slate-600 dark:text-slate-300">
+                                        {formatCurrency(row.value)}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 }
@@ -227,6 +407,8 @@ export default function Products({ products, printers, materials, filters, pagin
                         onSort={onSort}
                         emptyMessage="Nenhum produto encontrado."
                         onRowClick={details.view}
+                        isExpandable={(p) => p.is_composite}
+                        renderExpanded={(p) => <ProductPartsInlineList parts={p.parts} />}
                         actions={(p) => (
                             <div className="flex items-center justify-end gap-1">
                                 <a
@@ -403,7 +585,11 @@ export default function Products({ products, printers, materials, filters, pagin
                 fields={
                     details.row && [
                         details.row.is_composite
-                            ? { raw: true, className: 'sm:col-span-2', value: <ProductPartsPanel parts={details.row.parts} /> }
+                            ? {
+                                  raw: true,
+                                  className: 'sm:col-span-2',
+                                  value: <ProductPartsBreakdown parts={details.row.parts} breakdown={details.row.pricing.parts_breakdown} />,
+                              }
                             : { label: 'Impressora', value: details.row.printer_name, icon: PrinterFieldIcon },
                         ...(details.row.is_composite
                             ? []
