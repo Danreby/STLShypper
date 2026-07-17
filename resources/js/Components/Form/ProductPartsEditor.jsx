@@ -22,8 +22,6 @@ function MiniField({ label, error, children }) {
     );
 }
 
-// Linha colapsável de uma parte — fechada, mostra só um resumo de uma linha; aberta, mostra os
-// campos completos. Isso mantém a altura do formulário sob controle mesmo com muitas partes.
 function PartRow({ part, index, printers, materials, errors, expanded, onToggle, onUpdate, onDuplicate, onRemove, canRemove }) {
     const dragControls = useDragControls();
     const hasError = FIELD_KEYS.some((field) => errors[`parts.${index}.${field}`]);
@@ -193,20 +191,9 @@ function PartRow({ part, index, printers, materials, errors, expanded, onToggle,
     );
 }
 
-/**
- * Editor de partes de um produto composto (ex.: cabeça, pernas, braços) — cada parte é uma
- * impressão separada, com sua própria impressora, material, peso e tempo.
- *
- * Cada parte é uma linha colapsável (só uma aberta por vez, tipo acordeão) para manter o
- * formulário compacto mesmo com muitas partes, com duplicar e arrastar para reordenar.
- *
- * @param {{ parts: Array, onChange: (parts: Array) => void, printers: Array, materials: Array, errors?: Record<string,string> }} props
- */
 export default function ProductPartsEditor({ parts, onChange, printers, materials, errors = {} }) {
     const [expandedKey, setExpandedKey] = useState(() => (parts.length === 1 ? keyOf(parts[0]) : null));
 
-    // Se o envio falhar, abre automaticamente a primeira parte com erro — senão ela ficaria
-    // escondida atrás de uma linha recolhida.
     useEffect(() => {
         const erroredIndex = parts.findIndex((_, index) => FIELD_KEYS.some((field) => errors[`parts.${index}.${field}`]));
         if (erroredIndex !== -1) {

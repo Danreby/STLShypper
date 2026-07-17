@@ -42,7 +42,6 @@ class ProductStockTest extends TestCase
             'extra_material_pct' => 0,
         ]);
 
-        // simulate the stock already consumed when the product was first created
         $material->decrement('qtd', 0.1);
 
         $this->actingAs($user)->patch("/produtos/{$product->id}", [
@@ -56,7 +55,6 @@ class ProductStockTest extends TestCase
             'extra_material_pct' => 0,
         ])->assertRedirect();
 
-        // 0.9 + 0.1 (restored to 1.0) - 0.3 (new consumption) = 0.7
         $this->assertEquals(0.7, (float) $material->fresh()->qtd);
     }
 

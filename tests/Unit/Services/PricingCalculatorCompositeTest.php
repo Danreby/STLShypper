@@ -29,14 +29,12 @@ class PricingCalculatorCompositeTest extends TestCase
             'hours_per_year' => 1000,
         ]);
 
-        // Custo de depreciação por hora = 1 (1000/1000); potência 1000W + kwh_price 1 => energia por hora = 1.
         $printer = Printer::factory()->for($user)->create([
             'purchase_price' => 1000,
             'useful_life_hours' => 1000,
             'annual_maintenance' => 0,
             'power_w' => 1000,
         ]);
-        // Preço por kg = 1000 => custo de material = peso em gramas, 1:1.
         $material = Material::factory()->for($user)->create(['price_per_kg' => 1000]);
 
         $product = Product::factory()->for($user)->create([
@@ -52,7 +50,6 @@ class PricingCalculatorCompositeTest extends TestCase
 
         $pricing = PricingCalculator::calculateForProduct($product->fresh(), $settings);
 
-        // Peso por unidade: (10*1) + (5*2) = 20g. Tempo total: 2 + 4 = 6h.
         $this->assertSame(20.0, $pricing['total_weight_g']);
         $this->assertSame(6.0, $pricing['print_time_total_h']);
         $this->assertSame(20.0, $pricing['material_cost']);
@@ -62,7 +59,6 @@ class PricingCalculatorCompositeTest extends TestCase
         $this->assertSame(32.0, $pricing['cost_with_losses']);
         $this->assertSame(32.0, $pricing['suggested_price_per_unit']);
 
-        // Custo individual de cada parte (usado no painel de abas do modal de detalhes).
         $head = $product->parts->firstWhere('name', 'Cabeça');
         $legs = $product->parts->firstWhere('name', 'Pernas');
         $breakdown = collect($pricing['parts_breakdown'])->keyBy('id');
@@ -121,8 +117,6 @@ class PricingCalculatorCompositeTest extends TestCase
 
         $pricing = PricingCalculator::calculateForProduct($product->fresh(), $settings);
 
-        // Peso por unidade continua 20g (não depende da quantidade do pedido).
-        // Tempo por unidade agora é (2+4)/2 = 3h -> energia e máquina por unidade = 3.
         $this->assertSame(20.0, $pricing['material_cost']);
         $this->assertSame(3.0, $pricing['energy_cost']);
         $this->assertSame(3.0, $pricing['machine_cost']);

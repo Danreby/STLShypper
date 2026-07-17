@@ -55,8 +55,6 @@ class CompositeProductTest extends TestCase
         $response->assertSessionDoesntHaveErrors(['piece_weight_g', 'print_time_h']);
         $response->assertRedirect();
 
-        // O produto em si não tem peso/tempo próprios quando é composto — a coluna não aceita
-        // NULL, então o controller precisa preencher com 0 em vez de deixar nulo (regressão).
         $product = Product::where('user_id', $user->id)->firstOrFail();
         $this->assertSame('0.00', $product->piece_weight_g);
         $this->assertSame('0.00', $product->print_time_h);
@@ -114,9 +112,7 @@ class CompositeProductTest extends TestCase
             ],
         ])->assertRedirect();
 
-        // extra_material_pct padrão é 5%, então: 100*1.05/1000 = 0.105kg, arredondado para 0.11kg de cada material.
         $this->assertEquals(0.89, (float) $head->fresh()->qtd);
-        // 50*2 = 100g -> mesma matemática que a cabeça.
         $this->assertEquals(0.89, (float) $legs->fresh()->qtd);
     }
 

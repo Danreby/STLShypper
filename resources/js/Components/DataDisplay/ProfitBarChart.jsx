@@ -11,8 +11,6 @@ import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
-// Único hue por gráfico: cada card já é rotulado pelo título (produto/impressora nos eixos),
-// então a cor não carrega identidade extra — só distingue os dois cartões entre si.
 export default function ProfitBarChart({ data, color = '#6366f1' }) {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
