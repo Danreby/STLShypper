@@ -71,27 +71,53 @@
             <td class="label">Produto</td>
             <td class="value">{{ $product->name }}</td>
         </tr>
-        <tr>
-            <td class="label">Impressora</td>
-            <td class="value">{{ $product->printer?->name ?? '—' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Material</td>
-            <td class="value">{{ $product->material?->name ?? '—' }}{{ $product->material?->color ? ' ('.$product->material->color.')' : '' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Peso por peça</td>
-            <td class="value">{{ number_format($product->piece_weight_g, 2, ',', '.') }} g</td>
-        </tr>
-        <tr>
-            <td class="label">Tempo de impressão (total)</td>
-            <td class="value">{{ number_format($product->print_time_h, 2, ',', '.') }} h</td>
-        </tr>
+        @if ($product->parts->isEmpty())
+            <tr>
+                <td class="label">Impressora</td>
+                <td class="value">{{ $product->printer?->name ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Material</td>
+                <td class="value">{{ $product->material?->name ?? '—' }}{{ $product->material?->color ? ' ('.$product->material->color.')' : '' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Peso por peça</td>
+                <td class="value">{{ number_format($product->piece_weight_g, 2, ',', '.') }} g</td>
+            </tr>
+            <tr>
+                <td class="label">Tempo de impressão (total)</td>
+                <td class="value">{{ number_format($product->print_time_h, 2, ',', '.') }} h</td>
+            </tr>
+        @endif
         <tr>
             <td class="label">Quantidade</td>
             <td class="value">{{ $pricing['quantity'] }} un.</td>
         </tr>
     </table>
+
+    @if ($product->parts->isNotEmpty())
+        <h2 class="section">Partes da impressão ({{ $product->parts->count() }})</h2>
+        <table class="info-grid" style="border-collapse: collapse;">
+            <tr style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; color: #94a3b8;">
+                <td style="padding-bottom: 3px;">Parte</td>
+                <td style="padding-bottom: 3px;">Impressora</td>
+                <td style="padding-bottom: 3px;">Material</td>
+                <td style="padding-bottom: 3px; text-align: right;">Peso (un.)</td>
+                <td style="padding-bottom: 3px; text-align: right;">Qtd/produto</td>
+                <td style="padding-bottom: 3px; text-align: right;">Tempo total</td>
+            </tr>
+            @foreach ($product->parts as $part)
+                <tr style="border-top: 1px solid #e2e8f0;">
+                    <td style="padding: 4px 0; font-weight: bold; color: #0f172a;">{{ $part->name }}</td>
+                    <td style="padding: 4px 0;">{{ $part->printer?->name ?? '—' }}</td>
+                    <td style="padding: 4px 0;">{{ $part->material?->name ?? '—' }}</td>
+                    <td style="padding: 4px 0; text-align: right;">{{ number_format($part->piece_weight_g, 2, ',', '.') }} g</td>
+                    <td style="padding: 4px 0; text-align: right;">{{ $part->quantity_per_unit }}</td>
+                    <td style="padding: 4px 0; text-align: right;">{{ number_format($part->print_time_h, 2, ',', '.') }} h</td>
+                </tr>
+            @endforeach
+        </table>
+    @endif
 
     <h2 class="section">Composição de custo (por peça)</h2>
     <table class="data">

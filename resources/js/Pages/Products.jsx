@@ -6,6 +6,8 @@ import AlertWarning from '@/Components/Feedback/AlertWarning';
 import StatCard from '@/Components/DataDisplay/StatCard';
 import Autocomplete from '@/Components/Form/Autocomplete';
 import Input from '@/Components/Form/Input';
+import ProductPartsEditor from '@/Components/Form/ProductPartsEditor';
+import SegmentedToggle from '@/Components/Form/SegmentedToggle';
 import DataTable from '@/Components/DataDisplay/DataTable';
 import DetailsModal from '@/Components/Overlays/DetailsModal';
 import FilterBar from '@/Components/FilterBar';
@@ -23,6 +25,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import {
     AlertTriangle,
+    Blocks,
     Clock,
     Coins,
     FileDown,
@@ -40,6 +43,8 @@ import {
     Weight,
 } from 'lucide-react';
 
+const emptyPart = () => ({ name: '', printer_id: '', material_id: '', piece_weight_g: '', print_time_h: '', quantity_per_unit: 1 });
+
 const emptyForm = {
     name: '',
     printer_id: '',
@@ -49,7 +54,44 @@ const emptyForm = {
     labor_cost: '',
     extra_fixed_costs: '',
     quantity: 1,
+    parts: [],
 };
+
+const PRODUCT_MODE_OPTIONS = [
+    { value: 'simple', label: 'Peça única', hint: '1 impressão', description: 'Uma impressora, um material, uma impressão.', icon: Package },
+    {
+        value: 'composite',
+        label: 'Produto composto',
+        hint: 'Várias peças',
+        description: 'Várias impressões separadas (ex.: cabeça, pernas, braços).',
+        icon: Blocks,
+    },
+];
+
+function ProductPartsPanel({ parts }) {
+    return (
+        <div className="rounded-2xl border border-brand-200/70 bg-linear-to-br from-brand-50 to-accent-400/10 p-4 dark:border-white/10 dark:from-brand-500/10 dark:to-accent-400/5">
+            <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                Partes da impressão ({parts.length})
+            </span>
+            <div className="mt-2.5 space-y-2">
+                {parts.map((part) => (
+                    <div
+                        key={part.id}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl border border-black/5 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-white/10"
+                    >
+                        <span className="font-semibold text-slate-800 dark:text-slate-100">
+                            {part.name} {part.quantity_per_unit > 1 && <span className="text-slate-400">×{part.quantity_per_unit}</span>}
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                            {part.printer_name ?? '—'} · {part.material_name ?? '—'} · {part.piece_weight_g} g · {part.print_time_h} h
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 const columns = [
     { key: 'name', header: 'Produto', sortable: true },
@@ -57,14 +99,14 @@ const columns = [
         key: 'printer_name',
         header: 'Impressora',
         sortable: true,
-        render: (p) => p.printer_name ?? '—',
+        render: (p) => (p.is_composite ? <span className="text-xs italic">{p.parts.length} partes</span> : (p.printer_name ?? '—')),
         className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400',
     },
     {
         key: 'material_name',
         header: 'Material',
         sortable: true,
-        render: (p) => p.material_name ?? '—',
+        render: (p) => (p.is_composite ? '—' : (p.material_name ?? '—')),
         className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400',
     },
     { key: 'quantity', header: 'Qtd.', sortable: true },
@@ -107,8 +149,26 @@ export default function Products({ products, printers, materials, filters, pagin
             labor_cost: product.labor_cost,
             extra_fixed_costs: product.extra_fixed_costs,
             quantity: product.quantity,
+            parts: product.parts.map((part) => ({
+                name: part.name,
+                printer_id: part.printer_id ?? '',
+                material_id: part.material_id ?? '',
+                piece_weight_g: part.piece_weight_g,
+                print_time_h: part.print_time_h,
+                quantity_per_unit: part.quantity_per_unit,
+            })),
         }),
     });
+
+    const mode = data.parts.length > 0 ? 'composite' : 'simple';
+
+    function handleModeChange(newMode) {
+        if (newMode === 'composite' && data.parts.length === 0) {
+            setData('parts', [emptyPart()]);
+        } else if (newMode === 'simple') {
+            setData('parts', []);
+        }
+    }
 
     return (
         <>
@@ -212,63 +272,81 @@ export default function Products({ products, printers, materials, filters, pagin
                         <FormField label="Nome do produto" error={errors.name} icon={Tag} index={0} className="sm:col-span-2 lg:col-span-4">
                             <Input value={data.name} onChange={(e) => setData('name', e.target.value)} maxLength={255} autoFocus />
                         </FormField>
-                        <FormField label="Impressora" error={errors.printer_id} icon={PrinterFieldIcon} index={1}>
-                            <Autocomplete
-                                value={data.printer_id}
-                                onChange={(e) => setData('printer_id', e.target.value)}
-                                placeholder="Buscar impressora..."
-                            >
-                                {printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                            </Autocomplete>
+
+                        <FormField label="Tipo de produto" index={1} className="sm:col-span-2 lg:col-span-4">
+                            <SegmentedToggle options={PRODUCT_MODE_OPTIONS} value={mode} onChange={handleModeChange} layoutId="product-mode-active" />
                         </FormField>
-                        <FormField label="Material" error={errors.material_id} icon={Layers} index={2}>
-                            <Autocomplete
-                                value={data.material_id}
-                                onChange={(e) => setData('material_id', e.target.value)}
-                                placeholder="Buscar material..."
-                            >
-                                {materials.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                            </Autocomplete>
-                        </FormField>
-                        <FormField label="Quantidade" error={errors.quantity} icon={Hash} index={3}>
+
+                        {mode === 'simple' ? (
+                            <>
+                                <FormField label="Impressora" error={errors.printer_id} icon={PrinterFieldIcon} index={2}>
+                                    <Autocomplete
+                                        value={data.printer_id}
+                                        onChange={(e) => setData('printer_id', e.target.value)}
+                                        placeholder="Buscar impressora..."
+                                    >
+                                        {printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                    </Autocomplete>
+                                </FormField>
+                                <FormField label="Material" error={errors.material_id} icon={Layers} index={3}>
+                                    <Autocomplete
+                                        value={data.material_id}
+                                        onChange={(e) => setData('material_id', e.target.value)}
+                                        placeholder="Buscar material..."
+                                    >
+                                        {materials.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    </Autocomplete>
+                                </FormField>
+                                <FormField label="Peso unitário (g)" error={errors.piece_weight_g} icon={Weight} index={4}>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        max="50000"
+                                        value={data.piece_weight_g}
+                                        onChange={(e) => setData('piece_weight_g', e.target.value)}
+                                    />
+                                </FormField>
+                                <FormField label="Tempo de impr. (h)" error={errors.print_time_h} icon={Clock} index={5}>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        max="1000"
+                                        value={data.print_time_h}
+                                        onChange={(e) => setData('print_time_h', e.target.value)}
+                                    />
+                                </FormField>
+                            </>
+                        ) : (
+                            <div className="sm:col-span-2 lg:col-span-4">
+                                <span className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-brand-500/10 text-brand-600 dark:bg-accent-400/10 dark:text-accent-400">
+                                        <Blocks size={12} />
+                                    </span>
+                                    Partes da impressão
+                                </span>
+                                <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+                                    Cada parte é impressa separadamente. O tempo de cada parte é o total da(s) mesa(s) para a quantidade
+                                    pedida abaixo — dividimos automaticamente pela quantidade para o custo por unidade.
+                                </p>
+                                <ProductPartsEditor
+                                    parts={data.parts}
+                                    onChange={(parts) => setData('parts', parts)}
+                                    printers={printers}
+                                    materials={materials}
+                                    errors={errors}
+                                />
+                            </div>
+                        )}
+
+                        <FormField label="Quantidade" error={errors.quantity} icon={Hash} index={6}>
                             <Input
                                 type="number"
                                 min="1"
                                 max="100000"
                                 value={data.quantity}
                                 onChange={(e) => setData('quantity', e.target.value)}
-                            />
-                        </FormField>
-                        <FormField
-                            label="Peso unitário (g)"
-                            // hint="Peso de 1 peça — o custo de material já escala automaticamente pela quantidade."
-                            error={errors.piece_weight_g}
-                            icon={Weight}
-                            index={4}
-                        >
-                            <Input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                max="50000"
-                                value={data.piece_weight_g}
-                                onChange={(e) => setData('piece_weight_g', e.target.value)}
-                            />
-                        </FormField>
-                        <FormField
-                            label="Tempo de impr. (h)"
-                            // hint="Tempo da mesa inteira, com todas as peças da quantidade abaixo. Dividimos automaticamente pela quantidade para o custo por peça."
-                            error={errors.print_time_h}
-                            icon={Clock}
-                            index={5}
-                        >
-                            <Input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                max="1000"
-                                value={data.print_time_h}
-                                onChange={(e) => setData('print_time_h', e.target.value)}
                             />
                         </FormField>
                         <FormField label="Mão de obra (R$)" error={errors.labor_cost} icon={Users} index={6}>
@@ -324,11 +402,17 @@ export default function Products({ products, printers, materials, filters, pagin
                 }
                 fields={
                     details.row && [
-                        { label: 'Impressora', value: details.row.printer_name, icon: PrinterFieldIcon },
-                        { label: 'Material', value: details.row.material_name, icon: Layers },
+                        details.row.is_composite
+                            ? { raw: true, className: 'sm:col-span-2', value: <ProductPartsPanel parts={details.row.parts} /> }
+                            : { label: 'Impressora', value: details.row.printer_name, icon: PrinterFieldIcon },
+                        ...(details.row.is_composite
+                            ? []
+                            : [
+                                  { label: 'Material', value: details.row.material_name, icon: Layers },
+                                  { label: 'Peso unitário', value: `${details.row.piece_weight_g} g`, icon: Weight },
+                                  { label: 'Tempo de impressão', value: `${details.row.print_time_h} h`, icon: Clock },
+                              ]),
                         { label: 'Quantidade', value: details.row.quantity, icon: Hash },
-                        { label: 'Peso unitário', value: `${details.row.piece_weight_g} g`, icon: Weight },
-                        { label: 'Tempo de impressão', value: `${details.row.print_time_h} h`, icon: Clock },
                         { label: 'Mão de obra', value: formatCurrency(details.row.labor_cost), icon: Users },
                         { label: 'Custos fixos extras', value: formatCurrency(details.row.extra_fixed_costs), icon: Receipt },
                         { label: 'Custo unitário', value: formatCurrency(details.row.pricing.cost_with_losses), icon: Coins },

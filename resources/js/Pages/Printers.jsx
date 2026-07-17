@@ -366,7 +366,7 @@ export default function Printers({ printers, filters, pagination, filamentTypes 
                             label: 'Custo máquina/h',
                             value: formatCurrency(details.row.total_cost_per_hour),
                             icon: Coins,
-                            className: 'sm:col-span-2',
+                            // className: 'sm:col-span-2',
                         },
                         {
                             label: 'Link de compra',
@@ -381,7 +381,7 @@ export default function Printers({ printers, filters, pagination, filamentTypes 
                                     <ExternalLink size={14} /> Abrir link
                                 </a>
                             ),
-                            className: 'sm:col-span-2',
+                            // className: 'sm:col-span-2',
                         },
                     ]
                 }
