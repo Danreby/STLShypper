@@ -9,6 +9,7 @@ export function parseOptions(children) {
             value: String(rawValue),
             label: child.props.children,
             disabled: !!child.props.disabled,
+            color: child.props.color ?? null,
         });
     });
     return options;

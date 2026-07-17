@@ -84,7 +84,7 @@ export default function Calculator({ printers, materials, settings }) {
                                 <FormField label="Material">
                                     <Autocomplete value={form.material_id} onChange={updateField('material_id')} placeholder="Buscar material...">
                                         {materials.map((m) => (
-                                            <option key={m.id} value={m.id}>{m.name}</option>
+                                            <option key={m.id} value={m.id} color={m.color}>{m.name}</option>
                                         ))}
                                     </Autocomplete>
                                 </FormField>

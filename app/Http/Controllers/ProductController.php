@@ -62,7 +62,7 @@ class ProductController extends Controller
                 'total' => $paginator->total(),
             ],
             'printers' => $user->printers()->orderBy('name')->get(['id', 'name']),
-            'materials' => $user->materials()->orderBy('name')->get(['id', 'name']),
+            'materials' => $user->materials()->orderBy('name')->get(['id', 'name', 'color']),
             'filters' => [...$filters, 'sort' => $sort, 'direction' => $direction],
             'totals' => [
                 'total_revenue' => round($rows->sum(fn ($r) => $r['pricing']['total_price']), 2),

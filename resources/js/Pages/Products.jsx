@@ -286,7 +286,11 @@ const columns = [
         key: 'material_name',
         header: 'Material',
         sortable: true,
-        render: (p) => (p.is_composite ? '—' : (p.material_name ?? '—')),
+        render: (p) => {
+            if (!p.is_composite) return p.material_name ?? '—';
+            const count = new Set(p.parts.map((part) => part.material_id).filter(Boolean)).size;
+            return count > 0 ? <span className="text-xs italic">{count} {count > 1 ? 'materiais' : 'material'}</span> : '—';
+        },
         className: 'py-2.5 pr-4 text-slate-500 dark:text-slate-400',
     },
     { key: 'quantity', header: 'Qtd.', sortable: true },
@@ -394,7 +398,7 @@ export default function Products({ products, printers, materials, filters, pagin
                                 label: 'Material',
                                 allLabel: 'Todos os materiais',
                                 searchable: true,
-                                options: materials.map((m) => ({ value: String(m.id), label: m.name })),
+                                options: materials.map((m) => ({ value: String(m.id), label: m.name, color: m.color })),
                             },
                         ]}
                     />
@@ -476,7 +480,7 @@ export default function Products({ products, printers, materials, filters, pagin
                                         onChange={(e) => setData('material_id', e.target.value)}
                                         placeholder="Buscar material..."
                                     >
-                                        {materials.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                        {materials.map((m) => <option key={m.id} value={m.id} color={m.color}>{m.name}</option>)}
                                     </Autocomplete>
                                 </FormField>
                                 <FormField label="Peso unitário (g)" error={errors.piece_weight_g} icon={Weight} index={4}>

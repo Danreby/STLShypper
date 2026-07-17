@@ -92,7 +92,7 @@ export default function ProductPartsEditor({ parts, onChange, printers, material
                                         placeholder="Buscar material..."
                                     >
                                         {materials.map((m) => (
-                                            <option key={m.id} value={m.id}>
+                                            <option key={m.id} value={m.id} color={m.color}>
                                                 {m.name}
                                             </option>
                                         ))}

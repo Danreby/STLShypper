@@ -23,8 +23,14 @@ export default function Autocomplete({ className = '', children, value, onChange
             {({ open }) => (
                 <>
                     <div className="relative">
+                        {selected?.color && (
+                            <span
+                                className="pointer-events-none absolute left-3 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full ring-1 ring-inset ring-black/10 dark:ring-white/20"
+                                style={{ backgroundColor: selected.color }}
+                            />
+                        )}
                         <ComboboxInput
-                            className={`${inputClass} ${selected ? 'pr-14' : 'pr-9'} ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
+                            className={`${inputClass} ${selected ? 'pr-14' : 'pr-9'} ${selected?.color ? 'pl-8' : ''} ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
                             displayValue={() => selected?.label ?? ''}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder={placeholder}
@@ -86,7 +92,15 @@ export default function Autocomplete({ className = '', children, value, onChange
                                         >
                                             {({ selected: isSelected }) => (
                                                 <>
-                                                    <span className="truncate">{option.label}</span>
+                                                    <span className="flex min-w-0 items-center gap-2">
+                                                        {option.color && (
+                                                            <span
+                                                                className="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-inset ring-black/10 dark:ring-white/20"
+                                                                style={{ backgroundColor: option.color }}
+                                                            />
+                                                        )}
+                                                        <span className="truncate">{option.label}</span>
+                                                    </span>
                                                     {isSelected && <Check size={15} className="shrink-0" />}
                                                 </>
                                             )}

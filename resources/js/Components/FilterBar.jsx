@@ -80,7 +80,7 @@ export default function FilterBar({ routeName, filters, selects = [], searchPlac
                         >
                             {!s.searchable && <option value="">{s.allLabel ?? `Todos: ${s.label}`}</option>}
                             {s.options.map((option) => (
-                                <option key={option.value} value={option.value}>
+                                <option key={option.value} value={option.value} color={option.color}>
                                     {option.label}
                                 </option>
                             ))}
